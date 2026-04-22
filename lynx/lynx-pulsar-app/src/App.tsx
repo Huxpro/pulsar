@@ -527,12 +527,54 @@ export function App() {
     deepTickComposer.parse(deepTickPattern);
   }, []);
 
+  // ── Preset playback with progress indicator ──
+  const [playingPresetName, setPlayingPresetName] = useState("");
+  const [playProgress, setPlayProgress] = useState(0); // 0-100
+  const playIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const handlePlayPreset = (preset: PresetMeta) => {
+    // If already playing this preset, stop it
+    if (playingPresetName === preset.name) {
+      if (playIntervalRef.current) clearInterval(playIntervalRef.current);
+      setPlayingPresetName("");
+      setPlayProgress(0);
+      return;
+    }
+    // Stop any previous playback
+    if (playIntervalRef.current) clearInterval(playIntervalRef.current);
+
+    // Start playing
+    preset.play();
+    setPlayingPresetName(preset.name);
+    setPlayProgress(0);
+
+    if (preset.duration > 0) {
+      const startTime = Date.now();
+      playIntervalRef.current = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const pct = Math.min(100, (elapsed / preset.duration) * 100);
+        setPlayProgress(pct);
+        if (elapsed >= preset.duration) {
+          if (playIntervalRef.current) clearInterval(playIntervalRef.current);
+          playIntervalRef.current = null;
+          setPlayingPresetName("");
+          setPlayProgress(0);
+        }
+      }, 16); // ~60fps
+    } else {
+      // No duration — flash briefly
+      setTimeout(() => {
+        setPlayingPresetName("");
+        setPlayProgress(0);
+      }, 300);
+    }
+  };
+
   const handleAddTag = (tag: string) => {
     if (!selectedTags.includes(tag)) setSelectedTags([...selectedTags, tag]);
   };
   const handleRemoveTag = (tag: string) => setSelectedTags(selectedTags.filter((t) => t !== tag));
   const handleClearTags = () => setSelectedTags([]);
-  const handlePlayPreset = (preset: PresetMeta) => { preset.play(); };
 
   const handleTabHome = () => setActiveTab("home");
   const handleTabPresets = () => setActiveTab("presets");
@@ -635,14 +677,29 @@ export function App() {
                   </view>
                   <text className="preset-name">{preset.name}</text>
                   <text className="preset-desc">{preset.description}</text>
-                  <view className="preset-image-area">
+                  <view className="preset-image-area" style={{ position: "relative" }}>
                     <image
                       src={presetImages[preset.name] || ""}
                       style={{ width: "350px", height: "160px" }}
                     />
+                    {/* Progress indicator bar */}
+                    <view
+                      className="preset-progress-bar"
+                      style={{
+                        left: (playingPresetName === preset.name ? playProgress * 3.5 : -10) + "px",
+                        opacity: playingPresetName === preset.name ? 1 : 0,
+                      }}
+                    />
                   </view>
-                  <view className="preset-play-btn" bindtap={() => handlePlayPreset(preset)}>
-                    <text className="preset-play-text">Play {"\u25B7"}</text>
+                  <view
+                    className="preset-play-btn"
+                    bindtap={() => handlePlayPreset(preset)}
+                    style={{
+                      transform: playingPresetName === preset.name ? "translate(-3px, 3px)" : "translate(0px, 0px)",
+                      boxShadow: playingPresetName === preset.name ? "0px 0px 0px #38ACDD" : "-3px 3px 0px #38ACDD",
+                    }}
+                  >
+                    <text className="preset-play-text">{playingPresetName === preset.name ? "Stop \u25A0" : "Play \u25B7"}</text>
                   </view>
                 </view>
               ))}
