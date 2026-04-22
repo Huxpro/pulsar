@@ -1,0 +1,831 @@
+/* ═══════════════════════════════════════════════════════════════
+   Pulsar Design System — US-001
+   Source: PulsarApp/constants/theme.ts
+   Colors:
+     primary:        #001A72  (navy — titles, active tab, icons)
+     background:     #e1f3fa  (light blue — page bg)
+     card bg:        white
+     card border:    #38ACDD  (2px)
+     card shadow:    #38ACDD  (offset -3px 3px)
+     secondary text: #2B85AB  (subtitles)
+     tab inactive:   #B5E1F1
+     tab active:     #001A72
+     error/record:   #FF6259
+     success:        #57B495
+     tag bg:         #B5E1F1
+     tag text:       #001A72
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Page ──────────────────────────────────────────────────── */
+
+.page {
+  width: 100%;
+  height: 100%;
+  background-color: #e1f3fa;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Tab Bar ───────────────────────────────────────────────── */
+
+.tab-bar {
+  display: flex;
+  flex-direction: row;
+  background-color: white;
+  border-top-width: 1px;
+  border-top-color: #d8d8d8;
+  border-top-style: solid;
+  padding-bottom: 20px;
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 10px;
+  padding-bottom: 6px;
+}
+
+.tab-active {
+  border-top-width: 2px;
+  border-top-color: #001A72;
+  border-top-style: solid;
+}
+
+.tab-label {
+  font-size: 11px;
+  color: #B5E1F1;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.tab-label-active {
+  color: #001A72;
+  font-weight: 600;
+}
+
+/* ─── Typography ────────────────────────────────────────────── */
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #001A72;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #2B85AB;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #001A72;
+  margin-bottom: 12px;
+}
+
+/* ─── Card ──────────────────────────────────────────────────── */
+
+.card {
+  background-color: white;
+  border-width: 2px;
+  border-color: #38ACDD;
+  border-style: solid;
+  border-radius: 4px;
+  padding-top: 25px;
+  padding-bottom: 25px;
+  padding-left: 15px;
+  padding-right: 15px;
+  margin-bottom: 16px;
+}
+
+/* ─── Button ────────────────────────────────────────────────── */
+
+.btn {
+  background-color: white;
+  border-width: 2px;
+  border-color: #38ACDD;
+  border-style: solid;
+  border-radius: 4px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 18px;
+  padding-right: 18px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #001A72;
+}
+
+.btn-disabled {
+  opacity: 0.5;
+}
+
+/* ─── Tag ───────────────────────────────────────────────────── */
+
+.tag {
+  background-color: #B5E1F1;
+  border-radius: 20px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+
+.tag-text {
+  font-size: 12px;
+  color: #001A72;
+  font-weight: 500;
+}
+
+/* ─── Input ─────────────────────────────────────────────────── */
+
+.input-field {
+  border-width: 2px;
+  border-color: #B5E1F1;
+  border-style: solid;
+  border-radius: 4px;
+  padding-top: 18px;
+  padding-bottom: 18px;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-size: 16px;
+  color: #001A72;
+  background-color: white;
+}
+
+/* ─── Connection Badge ──────────────────────────────────────── */
+
+.conn-badge {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: white;
+  border-width: 2px;
+  border-color: #38ACDD;
+  border-style: solid;
+  border-radius: 50px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.conn-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  background-color: #FF6259;
+  margin-left: 10px;
+}
+
+.conn-text {
+  font-size: 14px;
+  color: #001A72;
+  font-weight: 500;
+}
+
+/* ─── Collapsible ───────────────────────────────────────────── */
+
+.collapsible-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.collapsible-chevron {
+  font-size: 16px;
+  color: #2B85AB;
+  margin-right: 8px;
+}
+
+.collapsible-title {
+  font-size: 16px;
+  color: #2B85AB;
+}
+
+.collapsible-body {
+  margin-top: 12px;
+  margin-left: 24px;
+}
+
+.collapsible-step {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 8px;
+}
+
+.collapsible-step-num {
+  font-size: 14px;
+  font-weight: 700;
+  color: #001A72;
+  margin-right: 8px;
+}
+
+.collapsible-step-text {
+  font-size: 14px;
+  color: #2B85AB;
+  flex: 1;
+}
+
+/* ─── Search ────────────────────────────────────────────────── */
+
+.search-input {
+  border-width: 2px;
+  border-color: #5BB9E0;
+  border-style: solid;
+  border-radius: 4px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 12px;
+  padding-right: 12px;
+  font-size: 14px;
+  color: #001A72;
+  background-color: white;
+  margin-bottom: 12px;
+}
+
+/* ─── Tag Filter Row ────────────────────────────────────────── */
+
+.tags-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.tag-filter {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: #FBFEFF;
+  border-radius: 20px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+
+.tag-filter-text {
+  font-size: 13px;
+  color: #001A72;
+  font-weight: 500;
+  margin-right: 6px;
+}
+
+.tag-filter-x {
+  font-size: 14px;
+  color: #001A72;
+  font-weight: 700;
+}
+
+/* ─── Preset Card ───────────────────────────────────────────── */
+
+.preset-card {
+  background-color: white;
+  border-width: 2px;
+  border-color: #38ACDD;
+  border-style: solid;
+  border-radius: 4px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  padding-left: 15px;
+  padding-right: 15px;
+  margin-bottom: 16px;
+}
+
+.preset-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #001A72;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.preset-desc {
+  font-size: 14px;
+  color: #2B85AB;
+  margin-bottom: 10px;
+}
+
+.preset-image-area {
+  height: 160px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #f8fcfe;
+}
+
+.preset-play-btn {
+  background-color: white;
+  border-width: 2px;
+  border-color: #38ACDD;
+  border-style: solid;
+  border-radius: 4px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preset-play-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #001A72;
+}
+
+/* ─── Playground ────────────────────────────────────────────── */
+
+.pg-grid {
+  height: 400px;
+  background-color: #f0f8fc;
+  border-width: 2px;
+  border-color: #38ACDD;
+  border-style: solid;
+  border-radius: 4px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pg-hint {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pg-hint-text {
+  font-size: 14px;
+  color: #2B85AB;
+  border-width: 1px;
+  border-color: #38ACDD;
+  border-style: solid;
+  border-radius: 4px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 12px;
+  padding-right: 12px;
+  background-color: white;
+}
+
+.pg-indicator {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  background-color: #001A72;
+  opacity: 0.7;
+}
+
+.pg-timer-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.pg-timer-label {
+  font-size: 14px;
+  color: #001A72;
+  opacity: 0.6;
+  margin-right: 8px;
+}
+
+.pg-timer-value {
+  font-size: 14px;
+  color: #001A72;
+  font-weight: 600;
+  min-width: 80px;
+}
+
+.pg-controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding-bottom: 20px;
+}
+
+.pg-btn-icon {
+  background-color: white;
+  border-width: 2px;
+  border-color: #38ACDD;
+  border-style: solid;
+  border-radius: 4px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pg-btn-icon-text {
+  font-size: 22px;
+  color: #001A72;
+  font-weight: 700;
+}
+
+.pg-btn-record {
+  flex: 1;
+  margin-left: 12px;
+  margin-right: 12px;
+  border-width: 3px;
+  border-color: #FF6259;
+  border-style: solid;
+  border-radius: 4px;
+  height: 60px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+}
+
+.pg-btn-record-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: #FF6259;
+}
+
+.pg-btn-disabled {
+  opacity: 0.4;
+}
+
+/* ─── Demo Card ─────────────────────────────────────────────── */
+
+.demo-card {
+  background-color: white;
+  border-width: 2px;
+  border-color: #38ACDD;
+  border-style: solid;
+  border-radius: 4px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  padding-left: 15px;
+  padding-right: 15px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.demo-card-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #001A72;
+}
+
+.demo-card-chevron {
+  font-size: 20px;
+  color: #38ACDD;
+  font-weight: 700;
+}
+
+/* ─── Demo Sub-panel (same pattern as tab-panel) ────────────── */
+
+.demo-container {
+  flex: 1;
+  position: relative;
+}
+
+.demo-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #e1f3fa;
+}
+
+/* ─── Demo Back Button ──────────────────────────────────────── */
+
+.back-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.back-text {
+  font-size: 16px;
+  color: #38ACDD;
+  font-weight: 600;
+}
+
+/* ─── Demo Content Placeholder ──────────────────────────────── */
+
+.demo-placeholder {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.demo-placeholder-text {
+  font-size: 16px;
+  color: #2B85AB;
+  text-align: center;
+}
+
+/* ─── Buttons Demo Grid ─────────────────────────────────────── */
+
+.btn-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.btn-grid-item {
+  width: 48%;
+  margin-bottom: 12px;
+}
+
+.btn-grid-btn {
+  background-color: white;
+  border-width: 2px;
+  border-color: #38ACDD;
+  border-style: solid;
+  border-radius: 4px;
+  padding-top: 24px;
+  padding-bottom: 24px;
+  padding-left: 16px;
+  padding-right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-grid-btn-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #001A72;
+}
+
+/* ─── Countdown Demo ───────────────────────────────────────── */
+
+.countdown-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.countdown-number {
+  font-size: 120px;
+  font-weight: 700;
+  color: #001A72;
+}
+
+.countdown-number-red {
+  color: #FF6259;
+}
+
+.countdown-status {
+  font-size: 16px;
+  color: #2B85AB;
+  text-align: center;
+  margin-top: 16px;
+  margin-bottom: 24px;
+}
+
+/* ─── Notification Demo ────────────────────────────────────── */
+
+.notif-card {
+  background-color: white;
+  border-radius: 8px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  padding-left: 16px;
+  padding-right: 16px;
+  margin-bottom: 12px;
+  border-left-width: 4px;
+  border-left-style: solid;
+}
+
+.notif-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #001A72;
+  margin-bottom: 4px;
+}
+
+.notif-message {
+  font-size: 14px;
+  color: #2B85AB;
+}
+
+/* ─── Dot Loader Demo ──────────────────────────────────────── */
+
+.dot-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  background-color: #001A72;
+  margin-left: 12px;
+  margin-right: 12px;
+}
+
+/* ─── Slider Demo ──────────────────────────────────────────── */
+
+.slider-card {
+  background-color: white;
+  border-width: 2px;
+  border-color: #38ACDD;
+  border-style: solid;
+  border-radius: 4px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  padding-left: 15px;
+  padding-right: 15px;
+  margin-bottom: 16px;
+}
+
+.slider-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #001A72;
+  margin-bottom: 4px;
+}
+
+.slider-value {
+  font-size: 14px;
+  color: #2B85AB;
+  margin-bottom: 12px;
+}
+
+.slider-track {
+  height: 6px;
+  background-color: #B5E1F1;
+  border-radius: 3px;
+  position: relative;
+}
+
+.slider-fill {
+  height: 6px;
+  background-color: #38ACDD;
+  border-radius: 3px;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.slider-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  background-color: #001A72;
+  position: absolute;
+  top: -11px;
+}
+
+/* ─── Balloon Demo ─────────────────────────────────────────── */
+
+.balloon-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.balloon-cell {
+  width: 48%;
+  height: 200px;
+  background-color: white;
+  border-width: 2px;
+  border-color: #38ACDD;
+  border-style: solid;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.balloon-emoji {
+  font-size: 60px;
+}
+
+.balloon-popped {
+  font-size: 28px;
+  color: #FF6259;
+  font-weight: 700;
+}
+
+.balloon-hint {
+  font-size: 12px;
+  color: #2B85AB;
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* ─── Sensor Demo ──────────────────────────────────────────── */
+
+.sensor-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sensor-circle {
+  width: 280px;
+  height: 280px;
+  border-radius: 140px;
+  border-width: 2px;
+  border-color: #38ACDD;
+  border-style: solid;
+  background-color: #f0f8fc;
+  position: relative;
+  overflow: hidden;
+}
+
+.sensor-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  background-color: #001A72;
+  position: absolute;
+}
+
+.sensor-note {
+  font-size: 13px;
+  color: #2B85AB;
+  text-align: center;
+  margin-top: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.sensor-fallback-hint {
+  font-size: 14px;
+  color: #001A72;
+  text-align: center;
+  margin-top: 12px;
+  font-weight: 500;
+}
+
+/* ─── Scrollable Content ────────────────────────────────────── */
+
+.scroll-content {
+  padding-top: 60px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+}
+
+/* ─── Tab Panel ─────────────────────────────────────────────── */
+
+.tab-content {
+  flex: 1;
+  position: relative;
+}
+
+.tab-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #e1f3fa;
+}
