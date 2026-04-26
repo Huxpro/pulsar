@@ -85,7 +85,7 @@
   font-size: 20px;
   font-weight: 600;
   color: #001A72;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 /* ─── Card ──────────────────────────────────────────────────── */
@@ -197,6 +197,34 @@
   font-size: 14px;
   color: #001A72;
   font-weight: 500;
+  lines: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Info Box (connection status) ─────────────────────────── */
+
+.info-box {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 12px;
+  padding-right: 12px;
+  background-color: #E1F3FA;
+  border-radius: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.info-box-text {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.disconnect-link {
+  font-size: 16px;
+  color: #001A72;
+  text-decoration: underline;
 }
 
 /* ─── Collapsible ───────────────────────────────────────────── */
@@ -227,6 +255,7 @@
 .collapsible-step {
   display: flex;
   flex-direction: row;
+  align-items: flex-start;
   margin-bottom: 8px;
 }
 
@@ -235,12 +264,12 @@
   font-weight: 700;
   color: #001A72;
   margin-right: 8px;
+  flex-shrink: 0;
 }
 
 .collapsible-step-text {
   font-size: 14px;
   color: #2B85AB;
-  flex: 1;
 }
 
 /* ─── Search ────────────────────────────────────────────────── */
@@ -574,12 +603,12 @@
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: space-between;
-  margin-top: 16px;
+  margin-top: 22px;
 }
 
 .btn-grid-item {
   width: 48%;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 }
 
 .btn-grid-btn {
@@ -595,6 +624,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: -3px 3px 0px #38ACDD;
+}
+
+.btn-grid-btn-pressed {
+  transform: translate(-3px, 3px);
+  box-shadow: 0px 0px 0px #38ACDD;
 }
 
 .btn-grid-btn-text {
@@ -605,76 +640,144 @@
 
 /* ─── Countdown Demo ───────────────────────────────────────── */
 
+.countdown-card {
+  margin-top: 40px;
+  align-items: center;
+  padding-top: 30px;
+  padding-bottom: 30px;
+  background-color: white;
+  border-radius: 16px;
+}
+
 .countdown-center {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .countdown-number {
-  font-size: 120px;
+  font-size: 72px;
   font-weight: 700;
   color: #001A72;
+  line-height: 80px;
 }
 
 .countdown-number-red {
-  color: #FF6259;
+  color: #FF3B30;
 }
 
 .countdown-status {
-  font-size: 16px;
+  font-size: 14px;
   color: #2B85AB;
   text-align: center;
-  margin-top: 16px;
-  margin-bottom: 24px;
+  margin-top: 12px;
+  opacity: 0.7;
+}
+
+.countdown-controls {
+  margin-top: 30px;
 }
 
 /* ─── Notification Demo ────────────────────────────────────── */
 
+.notif-display {
+  margin-top: 40px;
+  min-height: 80px;
+  justify-content: center;
+}
+
 .notif-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   background-color: white;
-  border-radius: 8px;
-  padding-top: 16px;
-  padding-bottom: 16px;
+  border-width: 2px;
+  border-color: #38ACDD;
+  border-style: solid;
+  border-radius: 4px;
+  box-shadow: -3px 3px 0px #38ACDD;
+  padding-top: 14px;
+  padding-bottom: 14px;
   padding-left: 16px;
   padding-right: 16px;
-  margin-bottom: 12px;
-  border-left-width: 4px;
-  border-left-style: solid;
+}
+
+.notif-icon-badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 14px;
+}
+
+.notif-icon-text {
+  font-size: 24px;
+  color: white;
+}
+
+.notif-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .notif-title {
-  font-size: 16px;
   font-weight: 600;
+  font-size: 14px;
   color: #001A72;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .notif-message {
   font-size: 14px;
-  color: #2B85AB;
+  color: #001A72;
+}
+
+.notif-btn-container {
+  margin-top: 40px;
 }
 
 /* ─── Dot Loader Demo ──────────────────────────────────────── */
+
+.dot-loader-area {
+  margin-top: 60px;
+  margin-bottom: 60px;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .dot-container {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  height: 120px;
-  margin-top: 40px;
-  margin-bottom: 40px;
+}
+
+.dot-wrapper {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+@keyframes dotWave {
+  0% { transform: translateY(0px); }
+  14% { transform: translateY(-30px); }
+  28% { transform: translateY(0px); }
+  100% { transform: translateY(0px); }
 }
 
 .dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 7px;
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
   background-color: #001A72;
-  margin-left: 12px;
-  margin-right: 12px;
+  animation-name: dotWave;
+  animation-duration: 1500ms;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
 }
 
 /* ─── Slider Demo ──────────────────────────────────────────── */
@@ -685,11 +788,12 @@
   border-color: #38ACDD;
   border-style: solid;
   border-radius: 4px;
-  padding-top: 20px;
-  padding-bottom: 20px;
-  padding-left: 15px;
-  padding-right: 15px;
-  margin-bottom: 16px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  padding-left: 12px;
+  padding-right: 12px;
+  margin-bottom: 24px;
+  box-shadow: -3px 3px 0px #38ACDD;
 }
 
 .slider-label {
@@ -705,29 +809,61 @@
   margin-bottom: 12px;
 }
 
+.slider-track-container {
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
 .slider-track {
   height: 6px;
-  background-color: #B5E1F1;
+  background-color: #E0F0FA;
   border-radius: 3px;
-  position: relative;
+  overflow: hidden;
 }
 
 .slider-fill {
   height: 6px;
-  background-color: #38ACDD;
+  background-color: rgba(100, 200, 255, 0.8);
   border-radius: 3px;
+}
+
+.slider-ticks {
   position: absolute;
-  left: 0;
-  top: 0;
+  left: 5px;
+  right: 5px;
+  height: 6px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slider-tick {
+  width: 2px;
+  height: 10px;
+  border-radius: 1px;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.slider-tick-active {
+  background-color: rgba(255, 255, 255, 0.8);
 }
 
 .slider-thumb {
-  width: 28px;
-  height: 28px;
-  border-radius: 14px;
-  background-color: #001A72;
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  background-color: #E0F0FA;
+  border-width: 2px;
+  border-color: rgba(100, 200, 255, 1);
+  border-style: solid;
   position: absolute;
-  top: -11px;
+  top: 15px;
 }
 
 /* ─── Balloon Demo ─────────────────────────────────────────── */
@@ -750,9 +886,11 @@
   border-radius: 4px;
   margin-bottom: 12px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  box-shadow: -3px 3px 0px #38ACDD;
 }
 
 .balloon-emoji {
@@ -760,9 +898,7 @@
 }
 
 .balloon-popped {
-  font-size: 28px;
-  color: #FF6259;
-  font-weight: 700;
+  font-size: 60px;
 }
 
 .balloon-hint {

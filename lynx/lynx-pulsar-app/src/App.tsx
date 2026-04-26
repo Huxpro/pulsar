@@ -6,9 +6,255 @@ import type { PresetMeta } from "./presetData.js";
 import presetImages from "./presetImages.js";
 import "./App.css";
 
+// Tab bar icons (PNG, converted from PulsarApp SVGs)
+import iconHomeActive from "./assets/icons/home-active.png";
+import iconHomeInactive from "./assets/icons/home-inactive.png";
+import iconListActive from "./assets/icons/list-active.png";
+import iconListInactive from "./assets/icons/list-inactive.png";
+import iconBrushActive from "./assets/icons/brush-active.png";
+import iconBrushInactive from "./assets/icons/brush-inactive.png";
+import iconSparklesActive from "./assets/icons/sparkles-active.png";
+import iconSparklesInactive from "./assets/icons/sparkles-inactive.png";
+
+const SOCKET_SERVER_URL = "wss://pulsar-server.swmansion.com";
+
+type ConnectionState =
+  | "DISCONNECTED"
+  | "CONNECTING"
+  | "CONNECTED_TO_SERVER"
+  | "FULLY_CONNECTED"
+  | "ERROR";
+
+type ErrorType = "INVALID_DATA" | "CONNECTION_FAILED" | null;
+
+function playPattern(patternName: string): boolean {
+  if (patternName.includes("System")) {
+    const key = patternName.replace("System", "").replace("Preset", "");
+    const normalizedKey = `${key.charAt(0).toLowerCase()}${key.slice(1)}`;
+    const systemPreset = (Presets.System as any)[normalizedKey] ?? (Presets.System as any)[key];
+    if (typeof systemPreset === "function") {
+      systemPreset();
+      return true;
+    }
+    const androidPreset = (Presets.System.Android as any)?.[normalizedKey] ?? (Presets.System.Android as any)?.[key];
+    if (typeof androidPreset === "function") {
+      androidPreset();
+      return true;
+    }
+    return false;
+  }
+  const normalizedName = `${patternName.charAt(0).toLowerCase()}${patternName.slice(1)}`;
+  const preset = (Presets as any)[patternName] ?? (Presets as any)[normalizedName];
+  if (typeof preset === "function") {
+    preset();
+    return true;
+  }
+  return false;
+}
+
 export function App() {
   const [activeTab, setActiveTab] = useState<string>("home");
   const [helpOpen, setHelpOpen] = useState(false);
+
+  // ── Connection state ──
+  const [connectionState, setConnectionState] = useState<ConnectionState>("DISCONNECTED");
+  const [errorType, setErrorType] = useState<ErrorType>(null);
+  const [connectingCode, setConnectingCode] = useState("");
+  const [showPatternNotification, setShowPatternNotification] = useState(false);
+  const [patternFound, setPatternFound] = useState(false);
+  const [patternName, setPatternName] = useState("");
+  const socketRef = useRef<WebSocket | null>(null);
+  const pingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const connectingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const patternNotificationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showPatternReceivedNotification = (found: boolean, name: string) => {
+    if (patternNotificationTimeoutRef.current) {
+      clearTimeout(patternNotificationTimeoutRef.current);
+    }
+    setPatternFound(found);
+    setPatternName(name);
+    setShowPatternNotification(true);
+    patternNotificationTimeoutRef.current = setTimeout(() => {
+      setShowPatternNotification(false);
+      patternNotificationTimeoutRef.current = null;
+    }, 1000);
+  };
+
+  const handleOnConnect = () => {
+    setErrorType(null);
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
+    }
+    if (connectingTimeoutRef.current) {
+      clearTimeout(connectingTimeoutRef.current);
+      connectingTimeoutRef.current = null;
+    }
+
+    const code = connectingCode.trim();
+    if (code.length === 0) return;
+
+    const query = `type=receiver&action=new_connection&code=${encodeURIComponent(code)}`;
+    const socketUrl = `${SOCKET_SERVER_URL}?${query}`;
+
+    if (socketRef.current) {
+      socketRef.current.close();
+      socketRef.current = null;
+    }
+
+    const socket = new WebSocket(socketUrl);
+    socketRef.current = socket;
+    let hadError = false;
+
+    connectingTimeoutRef.current = setTimeout(() => {
+      if (socketRef.current === socket) {
+        socket.close();
+        setConnectionState("ERROR");
+        setErrorType("CONNECTION_FAILED");
+      }
+    }, 15_000);
+
+    setConnectionState("CONNECTING");
+
+    socket.onopen = () => {
+      if (connectingTimeoutRef.current) {
+        clearTimeout(connectingTimeoutRef.current);
+        connectingTimeoutRef.current = null;
+      }
+      setConnectionState("CONNECTED_TO_SERVER");
+      pingIntervalRef.current = setInterval(() => {
+        if (socketRef.current?.readyState === WebSocket.OPEN) {
+          socketRef.current.send(JSON.stringify({ type: "ping" }));
+        }
+      }, 25_000);
+    };
+
+    socket.onmessage = (event: MessageEvent) => {
+      const payload = typeof event.data === "string" ? event.data : "";
+      try {
+        const json = JSON.parse(payload) as { type?: string; token?: string; message?: string };
+        if (json.type === "connection_established") {
+          setConnectionState("FULLY_CONNECTED");
+          Presets.breakingWave();
+        } else if (json.type === "connection_restored") {
+          setConnectionState("FULLY_CONNECTED");
+          Presets.breakingWave();
+        } else if (json.type === "peer_disconnected") {
+          setConnectionState("CONNECTED_TO_SERVER");
+        } else if (json.type === "pong") {
+          // keepalive response — no-op
+        } else if (json.type === "broadcast") {
+          if (json.message) {
+            const found = playPattern(json.message);
+            showPatternReceivedNotification(found, json.message);
+          }
+        }
+      } catch {
+        // parse error — ignore
+      }
+    };
+
+    socket.onerror = () => {
+      if (socketRef.current !== socket) return;
+      hadError = true;
+      setConnectionState("ERROR");
+      setErrorType("CONNECTION_FAILED");
+      Presets.chirp();
+    };
+
+    socket.onclose = (e: CloseEvent) => {
+      if (socketRef.current !== socket) return;
+      if (connectingTimeoutRef.current) {
+        clearTimeout(connectingTimeoutRef.current);
+        connectingTimeoutRef.current = null;
+      }
+      if (pingIntervalRef.current) {
+        clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = null;
+      }
+      if (e.code !== 1000 && !hadError) {
+        setConnectionState("ERROR");
+        setErrorType("INVALID_DATA");
+        Presets.chirp();
+      } else if (e.code === 1000) {
+        setConnectionState("DISCONNECTED");
+      }
+    };
+  };
+
+  const handleDisconnect = () => {
+    Presets.powerDown();
+    socketRef.current?.close();
+    socketRef.current = null;
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
+    }
+    if (connectingTimeoutRef.current) {
+      clearTimeout(connectingTimeoutRef.current);
+      connectingTimeoutRef.current = null;
+    }
+    setConnectingCode("");
+    setConnectionState("DISCONNECTED");
+    setErrorType(null);
+  };
+
+  // Connection badge helpers
+  const connBadgeText = () => {
+    switch (connectionState) {
+      case "CONNECTING":
+      case "CONNECTED_TO_SERVER":
+        return "Waiting";
+      case "FULLY_CONNECTED":
+        return "Connected";
+      default:
+        return "Not connected";
+    }
+  };
+
+  const connDotColor = (): string => {
+    switch (connectionState) {
+      case "CONNECTING":
+      case "CONNECTED_TO_SERVER":
+        return "#E1F3FA";
+      case "FULLY_CONNECTED":
+        return "#57B495";
+      default:
+        return "#FF6259";
+    }
+  };
+
+  const connSubtitleText = () => {
+    switch (connectionState) {
+      case "FULLY_CONNECTED":
+        return "Everything is ready, you can start testing the presets.";
+      default:
+        return "Connect your haptic device first. Pair it with the app now so you can test the presets.";
+    }
+  };
+
+  const infoBoxContent = (): { text: string; color: string } | null => {
+    switch (connectionState) {
+      case "CONNECTING":
+        return { text: "Connecting to server...", color: "#001A72" };
+      case "CONNECTED_TO_SERVER":
+        return { text: "Waiting for browser connection...", color: "#ffac59" };
+      case "FULLY_CONNECTED":
+        return { text: "You are connected with the browser!", color: "#57B495" };
+      case "ERROR":
+        return {
+          text: errorType === "INVALID_DATA" ? "Invalid data. Please try again." : "Unable to connect with the server!",
+          color: "#FF6259",
+        };
+      default:
+        return null;
+    }
+  };
+
+  const showConnectForm = connectionState === "DISCONNECTED" || connectionState === "ERROR";
+  const showDisconnectRow = connectionState === "CONNECTING" || connectionState === "CONNECTED_TO_SERVER" || connectionState === "FULLY_CONNECTED";
+  const infoBox = infoBoxContent();
 
   // ── Presets state ──
   const [searchQuery, setSearchQuery] = useState("");
@@ -17,7 +263,7 @@ export function App() {
 
   useEffect(() => {
     const level = Settings.getHapticsSupportLevel();
-    const labels: Record<number, string> = { 0: "None", 1: "Minimal", 2: "Limited", 3: "Standard", 4: "Advanced" };
+    const labels: Record<number, string> = { 0: "None", 2: "Limited", 3: "Standard", 4: "Advanced" };
     setSupportLevel(labels[level] || "Unknown");
   }, []);
 
@@ -179,15 +425,23 @@ export function App() {
   // ── Demos state ──
   const [activeDemo, setActiveDemo] = useState("");
   const DEMO_LIST = [
-    { id: "buttons", title: "Haptic Buttons" },
-    { id: "countdown", title: "Countdown Timer" },
-    { id: "notification", title: "Notification Haptics" },
+    { id: "slider", title: "Slider" },
+    { id: "buttons", title: "Buttons" },
+    { id: "countdown", title: "Countdown timer" },
+    { id: "balloon", title: "Balloon" },
     { id: "dotloader", title: "Dot Loader" },
-    { id: "slider", title: "Haptic Sliders" },
-    { id: "balloon", title: "Balloon Pop" },
+    { id: "notification", title: "Notification" },
     { id: "sensor", title: "Sensor Haptics" },
   ];
   const handleBackToMenu = () => setActiveDemo("");
+
+  // ── Button press animation state ──
+  const [pressedBtn, setPressedBtn] = useState("");
+  const handleDemoBtnPress = (id: string, play: () => void) => {
+    play();
+    setPressedBtn(id);
+    setTimeout(() => setPressedBtn(""), 200);
+  };
 
   // ── Sensor demo state (touch-based fallback since no accelerometer API in Lynx) ──
   const [sensorDotX, setSensorDotX] = useState(128); // center of 280px circle - 24px dot / 2
@@ -325,11 +579,16 @@ export function App() {
   const [slider1, setSlider1] = useState(50);
   const [slider2, setSlider2] = useState(50);
   const [slider3, setSlider3] = useState(50);
-  const slider1TickRef = useRef(5); // current tick mark (0-10)
+  const slider1TickRef = useRef(5);
   const slider2TickRef = useRef(5);
   const slider3TickRef = useRef(5);
+  // Track layout: store left edge and width per slider
+  const sliderTrackRefs = useRef<Record<number, { left: number; width: number }>>({
+    1: { left: 0, width: 300 },
+    2: { left: 0, width: 300 },
+    3: { left: 0, width: 300 },
+  });
 
-  // Slider patterns (exact from original)
   const quickTickPattern: Pattern = { discretePattern: [{ time: 0, amplitude: 1, frequency: 1 }, { time: 40, amplitude: 0, frequency: 1 }], continuousPattern: { amplitude: [], frequency: [] } };
   const softTickPattern: Pattern = { discretePattern: [{ time: 0, amplitude: 0.6, frequency: 0.4 }, { time: 60, amplitude: 0, frequency: 0.4 }], continuousPattern: { amplitude: [], frequency: [] } };
   const deepTickPattern: Pattern = { discretePattern: [{ time: 0, amplitude: 0.8, frequency: 0.2 }, { time: 80, amplitude: 0, frequency: 0.2 }], continuousPattern: { amplitude: [], frequency: [] } };
@@ -338,17 +597,36 @@ export function App() {
   const softTickComposer = usePatternComposer();
   const deepTickComposer = usePatternComposer();
 
-  // Slider touch: compute % from horizontal position within track
-  // Track has 15px left padding in the card + 20px scroll-content padding = 35px offset
-  // Track width ≈ screen width - 70px (20px padding each side + 15px card padding each side)
+  const THUMB_SIZE = 30;
+  const TRACK_PADDING = 5; // matches slider-track-container padding-left/right
+
+  // Store track layout from bindlayoutchange
+  const handleSliderLayout = (sliderNum: number) => (e: any) => {
+    const layout = e?.detail || e;
+    if (layout && layout.width) {
+      sliderTrackRefs.current[sliderNum] = { left: layout.x || 0, width: layout.width };
+    }
+  };
+
+  // Helper: compute thumb left (px) from percentage, accounting for thumb width
+  const thumbLeft = (pct: number, sliderNum: number): string => {
+    const track = sliderTrackRefs.current[sliderNum];
+    if (!track || !track.width) return (pct + "%");
+    const trackInner = track.width - TRACK_PADDING * 2;
+    const px = TRACK_PADDING + (pct / 100) * (trackInner - THUMB_SIZE);
+    return px + "px";
+  };
+
+  // Compute % from touch relative to track
   const handleSliderMove = (sliderNum: number) => (e: any) => {
     const touch = e.changedTouches?.[0] || e.touches?.[0];
     if (!touch) return;
-    // Estimate track bounds: left edge ~35px, right edge ~screen-35px
-    // Use pageX relative to approximate track position
-    const trackLeft = 35;
-    const trackWidth = 320; // approximate for most phones
-    const raw = ((touch.pageX - trackLeft) / trackWidth) * 100;
+    const track = sliderTrackRefs.current[sliderNum];
+    if (!track || !track.width) return;
+    // Subtract padding to get position within actual track area
+    const trackInner = track.width - TRACK_PADDING * 2;
+    const localX = (touch.offsetX !== undefined ? touch.offsetX : touch.pageX - track.left) - TRACK_PADDING;
+    const raw = (localX / trackInner) * 100;
     const pct = Math.max(0, Math.min(100, Math.round(raw)));
     const tick = Math.floor(pct / 10);
 
@@ -365,9 +643,8 @@ export function App() {
   };
 
   // ── Dot Loader demo state ──
-  const [dotOffsets, setDotOffsets] = useState([0, 0, 0]);
-  const dotLoaderRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const dotLoaderActiveRef = useRef(false);
+  const dotHapticTimersRef = useRef<{ timeouts: ReturnType<typeof setTimeout>[]; intervals: ReturnType<typeof setInterval>[] }>({ timeouts: [], intervals: [] });
 
   // Dot loader patterns (exact from original)
   const dotPattern1: Pattern = { discretePattern: [{ time: 0, amplitude: 0.8, frequency: 0.9 }, { time: 40, amplitude: 0, frequency: 0.9 }], continuousPattern: { amplitude: [], frequency: [] } };
@@ -380,50 +657,40 @@ export function App() {
 
   const CYCLE = 1500;
   const DOT_DELAY = 220;
-  const WAVE_HEIGHT = 30;
+  const BOTTOM_HIT_RATIO = 0.21;
 
-  // Start/stop dot loader when demo is active
+  // Schedule haptic taps when dot loader is active (CSS handles animation)
   useEffect(() => {
     if (activeDemo === "dotloader" && !dotLoaderActiveRef.current) {
       dotLoaderActiveRef.current = true;
-      const startTime = Date.now();
+      const composers = [dotComposer1, dotComposer2, dotComposer3];
+      const timers = dotHapticTimersRef.current;
 
-      // Schedule haptic taps at bottom-hit points
-      const hitRatio = 0.21;
-      const hitTime = CYCLE * hitRatio;
-      // First round of haptics
-      setTimeout(() => dotComposer1.play(), hitTime);
-      setTimeout(() => dotComposer2.play(), hitTime + DOT_DELAY);
-      setTimeout(() => dotComposer3.play(), hitTime + DOT_DELAY * 2);
-      // Repeating haptics
-      const hapticInterval = setInterval(() => {
-        dotComposer1.play();
-        setTimeout(() => dotComposer2.play(), DOT_DELAY);
-        setTimeout(() => dotComposer3.play(), DOT_DELAY * 2);
-      }, CYCLE);
-
-      // Animate dot positions at 30fps
-      const animInterval = setInterval(() => {
-        const now = Date.now() - startTime;
-        const offsets = [0, 1, 2].map((i) => {
-          const t = (now - i * DOT_DELAY) % CYCLE;
-          const phase = (t / CYCLE) * Math.PI * 2;
-          // Sine wave: negative = up, positive = down. Peak at bottom.
-          return Math.sin(phase) * WAVE_HEIGHT * -1;
-        });
-        setDotOffsets(offsets);
-      }, 33);
-
-      dotLoaderRef.current = animInterval;
+      // Per-dot haptic scheduling (matches original LoaderDot useEffect)
+      composers.forEach((composer, i) => {
+        const firstHit = i * DOT_DELAY + CYCLE * BOTTOM_HIT_RATIO;
+        const t = setTimeout(() => {
+          composer.play();
+          const interval = setInterval(() => composer.play(), CYCLE);
+          timers.intervals.push(interval);
+        }, firstHit);
+        timers.timeouts.push(t);
+      });
 
       return () => {
-        clearInterval(animInterval);
-        clearInterval(hapticInterval);
+        timers.timeouts.forEach((t) => clearTimeout(t));
+        timers.intervals.forEach((t) => clearInterval(t));
+        timers.timeouts = [];
+        timers.intervals = [];
         dotLoaderActiveRef.current = false;
       };
     }
     if (activeDemo !== "dotloader" && dotLoaderActiveRef.current) {
-      if (dotLoaderRef.current) clearInterval(dotLoaderRef.current);
+      const timers = dotHapticTimersRef.current;
+      timers.timeouts.forEach((t) => clearTimeout(t));
+      timers.intervals.forEach((t) => clearInterval(t));
+      timers.timeouts = [];
+      timers.intervals = [];
       dotLoaderActiveRef.current = false;
     }
   }, [activeDemo]);
@@ -432,11 +699,11 @@ export function App() {
   const [notifPlaying, setNotifPlaying] = useState(false);
   const [activeNotifIndex, setActiveNotifIndex] = useState(-1);
   const NOTIFICATIONS = [
-    { id: "success", emoji: "\u2713", title: "Success", message: "Payment received successfully", color: "#10B981", play: Presets.stamp },
-    { id: "alert", emoji: "!", title: "Alert", message: "Low battery warning", color: "#F59E0B", play: Presets.peal },
-    { id: "message", emoji: "\u2709", title: "Message", message: "You have a new message", color: "#3B82F6", play: Presets.chime },
-    { id: "error", emoji: "\u2717", title: "Error", message: "Connection failed", color: "#EF4444", play: Presets.buzz },
-    { id: "reminder", emoji: "\u25C9", title: "Reminder", message: "Meeting starts in 15 minutes", color: "#8B5CF6", play: Presets.swell },
+    { id: "success", title: "Success", message: "Payment received successfully", color: "#10B981", icon: "\u2713", play: Presets.stamp },
+    { id: "alert", title: "Alert", message: "Low battery warning", color: "#F59E0B", icon: "!", play: Presets.peal },
+    { id: "message", title: "Message", message: "You have a new message", color: "#3B82F6", icon: "\u2709", play: Presets.chime },
+    { id: "error", title: "Error", message: "Connection failed", color: "#EF4444", icon: "\u2717", play: Presets.buzz },
+    { id: "reminder", title: "Reminder", message: "Meeting starts in 15 minutes", color: "#8B5CF6", icon: "\u23F0", play: Presets.swell },
   ];
 
   const handlePlayNotifications = () => {
@@ -452,14 +719,15 @@ export function App() {
       setActiveNotifIndex(idx);
       NOTIFICATIONS[idx].play();
       idx++;
-      setTimeout(showNext, 1200);
+      setTimeout(showNext, 1000);
     };
     showNext();
   };
 
   // ── Countdown demo state ──
-  const [countdown, setCountdown] = useState(7);
+  const [countdown, setCountdown] = useState<number | null>(null); // null = ready state
   const [countdownRunning, setCountdownRunning] = useState(false);
+  const [countdownAnimKey, setCountdownAnimKey] = useState(0);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Countdown patterns (exact values from original)
@@ -472,13 +740,20 @@ export function App() {
   const completeComposer = usePatternComposer();
 
   const handleStartCountdown = () => {
-    if (countdownRunning) return;
+    if (countdownRunning) {
+      // Reset
+      if (countdownRef.current) clearInterval(countdownRef.current);
+      setCountdownRunning(false);
+      setCountdown(null);
+      return;
+    }
     setCountdown(7);
     setCountdownRunning(true);
     let count = 7;
     countdownRef.current = setInterval(() => {
       count--;
       setCountdown(count);
+      setCountdownAnimKey((k) => k + 1); // trigger animation per tick
       if (count > 3) {
         tickComposer.play();
       } else if (count > 0) {
@@ -487,8 +762,8 @@ export function App() {
         completeComposer.play();
         if (countdownRef.current) clearInterval(countdownRef.current);
         setCountdownRunning(false);
-        // Reset after 2 seconds
-        setTimeout(() => setCountdown(7), 2000);
+        // Reset to ready state after showing "Complete!"
+        setTimeout(() => setCountdown(null), 2000);
       }
     }, 1000);
   };
@@ -589,48 +864,83 @@ export function App() {
         <view className="tab-panel" style={{ display: activeTab === "home" ? "flex" : "none", flexDirection: "column", zIndex: activeTab === "home" ? 10 : 0 }}>
           <scroll-view scroll-orientation="vertical" style={{ flex: 1 }}>
             <view className="scroll-content">
-              {/* Title row with badge */}
-              <view style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <text className="title">Welcome to Pulsar!</text>
-                <view className="conn-badge">
-                  <text className="conn-text">Not connected</text>
-                  <view className="conn-dot" />
+              {/* Title */}
+              <text className="title" style={{ marginTop: "30px", marginBottom: "30px" }}>Welcome to Pulsar!</text>
+
+              {/* Card wrapper — badge overlaps card corner */}
+              <view style={{ position: "relative" }}>
+                {/* Connection badge — overlaps top-right of card */}
+                <view className="conn-badge" style={{ position: "absolute", top: "-12px", right: "-8px", zIndex: 2 }}>
+                  <text className="conn-text">{connBadgeText()}</text>
+                  <view className="conn-dot" style={{ backgroundColor: connDotColor() }} />
+                </view>
+
+                {/* Connect device card */}
+                <view className="card">
+                  <text className="section-title">Connect device</text>
+                  <text className="subtitle" style={{ marginTop: "12px" }}>{connSubtitleText()}</text>
+
+                  {/* Info box — shows connection status */}
+                  <view className="info-box" style={{ display: infoBox ? "flex" : "none", marginTop: "16px" }}>
+                    <text className="info-box-text" style={{ color: infoBox?.color || "#001A72" }}>{infoBox?.text || ""}</text>
+                  </view>
+
+                  {/* Disconnect row — shown when connected/connecting */}
+                  <view style={{ display: showDisconnectRow ? "flex" : "none", flexDirection: "row", justifyContent: "space-evenly", marginTop: "16px" }}>
+                    <view bindtap={handleDisconnect}>
+                      <text className="disconnect-link">Disconnect</text>
+                    </view>
+                  </view>
+
+                  {/* Connect form — shown when disconnected or error */}
+                  <view style={{ display: showConnectForm ? "flex" : "none", flexDirection: "column" }}>
+                    <input
+                      className="input-field"
+                      placeholder="Connecting code"
+                      style={{ marginTop: "16px" }}
+                      value={connectingCode}
+                      bindinput={(e: any) => setConnectingCode(e.detail.value || "")}
+                    />
+
+                    <view className="btn" style={{ marginTop: "15px" }} bindtap={handleOnConnect}>
+                      <text className="btn-text">{connectionState === "CONNECTING" ? "Connecting..." : "Connect"}</text>
+                    </view>
+
+                    {/* Collapsible help — inside the card, inside the connect form */}
+                    <view className="collapsible-header" style={{ marginTop: "16px" }} bindtap={handleToggleHelp}>
+                      <text className="collapsible-chevron">{helpOpen ? "v" : ">"}</text>
+                      <text className="collapsible-title">How to connect a device?</text>
+                    </view>
+
+                    <view style={{ height: helpOpen ? "auto" : "0px", overflow: "hidden", flexDirection: "column" }}>
+                      <view className="collapsible-body">
+                        <view className="collapsible-step">
+                          <text className="collapsible-step-num">1.</text>
+                          <view style={{ flex: 1 }}>
+                            <text className="collapsible-step-text">Open Pulsar documentation on Presets playground and find Device Connection section.</text>
+                          </view>
+                        </view>
+                        <view className="collapsible-step">
+                          <text className="collapsible-step-num">2.</text>
+                          <view style={{ flex: 1 }}>
+                            <text className="collapsible-step-text">Scan QR code or type Pairing code into PulsarApp and click Connect button.</text>
+                          </view>
+                        </view>
+                        <view className="collapsible-step">
+                          <text className="collapsible-step-num">3.</text>
+                          <view style={{ flex: 1 }}>
+                            <text className="collapsible-step-text">Select one of the presets on the website and experience the haptics right on your device.</text>
+                          </view>
+                        </view>
+                      </view>
+                    </view>
+                  </view>
                 </view>
               </view>
 
-              {/* Connect device card */}
-              <view className="card" style={{ marginTop: "24px" }}>
-                <text className="section-title">Connect device</text>
-                <text className="subtitle">Connect your haptic device first. Pair it with the app now so you can test the presets.</text>
-
-                <input className="input-field" placeholder="Connecting code" />
-
-                <view className="btn" style={{ marginTop: "15px" }}>
-                  <text className="btn-text">Connect</text>
-                </view>
-              </view>
-
-              {/* Collapsible help section */}
-              <view className="collapsible-header" bindtap={handleToggleHelp}>
-                <text className="collapsible-chevron">{helpOpen ? "v" : ">"}</text>
-                <text className="collapsible-title">How to connect a device?</text>
-              </view>
-
-              <view style={{ display: helpOpen ? "flex" : "none" }}>
-                <view className="collapsible-body">
-                  <view className="collapsible-step">
-                    <text className="collapsible-step-num">1.</text>
-                    <text className="collapsible-step-text">Open Pulsar documentation on Presets playground and find Device Connection section.</text>
-                  </view>
-                  <view className="collapsible-step">
-                    <text className="collapsible-step-num">2.</text>
-                    <text className="collapsible-step-text">Scan QR code or type Pairing code into PulsarApp and click Connect button.</text>
-                  </view>
-                  <view className="collapsible-step">
-                    <text className="collapsible-step-num">3.</text>
-                    <text className="collapsible-step-text">Select one of the presets on the website and experience the haptics right on your device.</text>
-                  </view>
-                </view>
+              {/* Pattern notification toast */}
+              <view className="card" style={{ display: showPatternNotification ? "flex" : "none", marginTop: "16px" }}>
+                <text className="section-title">{patternFound ? `${patternName} is playing!` : "Preset not found!"}</text>
               </view>
             </view>
           </scroll-view>
@@ -641,7 +951,7 @@ export function App() {
           <scroll-view scroll-orientation="vertical" style={{ flex: 1 }}>
             <view className="scroll-content">
               <text className="title">Get to know Pulsar presets</text>
-              <text className="subtitle">Don't spend time creating your own patterns. Just use ours and enjoy the benefits of having haptics in your app. Haptics support: {supportLevel}</text>
+              <text className="subtitle">Do not spend time creating your own patterns. Just use ours and enjoy the benefits of having haptics in your app. Haptics support: {supportLevel}</text>
 
               {/* Search */}
               <input
@@ -786,15 +1096,15 @@ export function App() {
             <scroll-view scroll-orientation="vertical" style={{ flex: 1 }}>
               <view className="scroll-content">
                 <view className="back-row" bindtap={handleBackToMenu}><text className="back-text">{"< Back"}</text></view>
-                <text className="section-title">Haptic Buttons</text>
-                <text className="subtitle">Each button triggers a different haptic pattern</text>
+                <text className="section-title">Buttons haptics grid</text>
+                <text className="subtitle">Tap each button to feel a different haptic pattern.</text>
                 <view className="btn-grid">
-                  <view className="btn-grid-item"><view className="btn-grid-btn" bindtap={() => tapComposer.play()}><text className="btn-grid-btn-text">Tap</text></view></view>
-                  <view className="btn-grid-item"><view className="btn-grid-btn" bindtap={() => softComposer.play()}><text className="btn-grid-btn-text">Soft</text></view></view>
-                  <view className="btn-grid-item"><view className="btn-grid-btn" bindtap={() => deepComposer.play()}><text className="btn-grid-btn-text">Deep</text></view></view>
-                  <view className="btn-grid-item"><view className="btn-grid-btn" bindtap={() => doubleComposer.play()}><text className="btn-grid-btn-text">Double</text></view></view>
-                  <view className="btn-grid-item"><view className="btn-grid-btn" bindtap={() => knockComposer.play()}><text className="btn-grid-btn-text">Knock</text></view></view>
-                  <view className="btn-grid-item"><view className="btn-grid-btn" bindtap={() => rippleComposer.play()}><text className="btn-grid-btn-text">Ripple</text></view></view>
+                  <view className="btn-grid-item"><view className={`btn-grid-btn ${pressedBtn === "tap" ? "btn-grid-btn-pressed" : ""}`} bindtap={() => handleDemoBtnPress("tap", () => tapComposer.play())}><text className="btn-grid-btn-text">Tap</text></view></view>
+                  <view className="btn-grid-item"><view className={`btn-grid-btn ${pressedBtn === "soft" ? "btn-grid-btn-pressed" : ""}`} bindtap={() => handleDemoBtnPress("soft", () => softComposer.play())}><text className="btn-grid-btn-text">Soft</text></view></view>
+                  <view className="btn-grid-item"><view className={`btn-grid-btn ${pressedBtn === "deep" ? "btn-grid-btn-pressed" : ""}`} bindtap={() => handleDemoBtnPress("deep", () => deepComposer.play())}><text className="btn-grid-btn-text">Deep</text></view></view>
+                  <view className="btn-grid-item"><view className={`btn-grid-btn ${pressedBtn === "double" ? "btn-grid-btn-pressed" : ""}`} bindtap={() => handleDemoBtnPress("double", () => doubleComposer.play())}><text className="btn-grid-btn-text">Double</text></view></view>
+                  <view className="btn-grid-item"><view className={`btn-grid-btn ${pressedBtn === "knock" ? "btn-grid-btn-pressed" : ""}`} bindtap={() => handleDemoBtnPress("knock", () => knockComposer.play())}><text className="btn-grid-btn-text">Knock</text></view></view>
+                  <view className="btn-grid-item"><view className={`btn-grid-btn ${pressedBtn === "ripple" ? "btn-grid-btn-pressed" : ""}`} bindtap={() => handleDemoBtnPress("ripple", () => rippleComposer.play())}><text className="btn-grid-btn-text">Ripple</text></view></view>
                 </view>
               </view>
             </scroll-view>
@@ -802,18 +1112,38 @@ export function App() {
 
           {/* Demo: Countdown Timer */}
           <view className="demo-panel" style={{ display: activeDemo === "countdown" ? "flex" : "none", flexDirection: "column", zIndex: activeDemo === "countdown" ? 10 : 0 }}>
-            <view style={{ flex: 1, paddingTop: "60px", paddingLeft: "20px", paddingRight: "20px", paddingBottom: "20px", display: "flex", flexDirection: "column" }}>
-              <view className="back-row" bindtap={handleBackToMenu}><text className="back-text">{"< Back"}</text></view>
-              <text className="section-title">Countdown Timer</text>
-              <text className="subtitle">Haptic ticks intensify as the countdown nears zero</text>
-              <view className="countdown-center">
-                <text className={countdown <= 3 && countdownRunning ? "countdown-number countdown-number-red" : "countdown-number"}>{countdown}</text>
+            <scroll-view scroll-orientation="vertical" style={{ flex: 1 }}>
+              <view className="scroll-content">
+                <view className="back-row" bindtap={handleBackToMenu}><text className="back-text">{"< Back"}</text></view>
+                <text className="section-title">Countdown timer</text>
+                <text className="subtitle">Experience haptic feedback synced to a countdown timer.</text>
+
+                <view className="countdown-card">
+                  <view className="countdown-center">
+                    <text
+                      key={"cd-" + countdownAnimKey}
+                      className={countdown !== null && countdown > 0 && countdown <= 3 ? "countdown-number countdown-number-red" : "countdown-number"}
+                      style={countdownAnimKey > 0 ? {
+                        animationName: "{ 0% { opacity: 0; transform: scale(0.5) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0px); } }",
+                        animationDuration: "300ms",
+                        animationTimingFunction: "ease-out",
+                      } : undefined}
+                    >{countdown !== null ? countdown : "..."}</text>
+                  </view>
+                  <text className="countdown-status">
+                    {countdown === null && !countdownRunning ? "Ready to start" : ""}
+                    {countdownRunning && countdown !== null && countdown > 0 ? countdown + " seconds left" : ""}
+                    {countdown === 0 && !countdownRunning ? "Complete!" : ""}
+                  </text>
+                </view>
+
+                <view className="countdown-controls">
+                  <view className="btn" bindtap={handleStartCountdown}>
+                    <text className="btn-text">{countdown === null ? "Start Countdown" : "Reset"}</text>
+                  </view>
+                </view>
               </view>
-              <text className="countdown-status">{countdownRunning ? "Counting down..." : countdown === 0 ? "Complete!" : "Ready"}</text>
-              <view className="btn" bindtap={handleStartCountdown}>
-                <text className="btn-text">{countdownRunning ? "Running..." : "Start"}</text>
-              </view>
-            </view>
+            </scroll-view>
           </view>
 
           {/* Demo: Notification Haptics */}
@@ -822,43 +1152,62 @@ export function App() {
               <view className="scroll-content">
                 <view className="back-row" bindtap={handleBackToMenu}><text className="back-text">{"< Back"}</text></view>
                 <text className="section-title">Notification Haptics</text>
-                <text className="subtitle">Each notification type has a matching haptic pattern</text>
+                <text className="subtitle">Each notification type has its own unique haptic pattern that matches its intention.</text>
 
-                <view className="btn" style={{ marginBottom: "24px" }} bindtap={handlePlayNotifications}>
-                  <text className="btn-text">{notifPlaying ? "Playing..." : "Play All Notifications"}</text>
+                {/* Notification display — show current notification */}
+                <view className="notif-display">
+                  {activeNotifIndex >= 0 && activeNotifIndex < NOTIFICATIONS.length ? (
+                    <view
+                      key={NOTIFICATIONS[activeNotifIndex].id}
+                      className="notif-card"
+                      style={{
+                        animationName: "{ 0% { opacity: 0; transform: translateY(30px); } 70% { opacity: 1; transform: translateY(-5px); } 100% { opacity: 1; transform: translateY(0px); } }",
+                        animationDuration: "400ms",
+                        animationTimingFunction: "ease-out",
+                      }}
+                    >
+                      <view className="notif-icon-badge" style={{ backgroundColor: NOTIFICATIONS[activeNotifIndex].color }}>
+                        <text className="notif-icon-text">{NOTIFICATIONS[activeNotifIndex].icon}</text>
+                      </view>
+                      <view className="notif-content">
+                        <text className="notif-title">{NOTIFICATIONS[activeNotifIndex].title}</text>
+                        <text className="notif-message">{NOTIFICATIONS[activeNotifIndex].message}</text>
+                      </view>
+                    </view>
+                  ) : null}
                 </view>
 
-                {NOTIFICATIONS.map((notif, idx) => (
-                  <view
-                    key={notif.id}
-                    className="notif-card"
-                    style={{
-                      borderLeftColor: notif.color,
-                      opacity: activeNotifIndex === -1 ? 1 : activeNotifIndex === idx ? 1 : 0.3,
-                    }}
-                  >
-                    <text className="notif-title">{notif.emoji} {notif.title}</text>
-                    <text className="notif-message">{notif.message}</text>
+                <view className="notif-btn-container">
+                  <view className="btn" bindtap={handlePlayNotifications}>
+                    <text className="btn-text">{notifPlaying ? "Playing..." : "Play All Notifications"}</text>
                   </view>
-                ))}
+                </view>
               </view>
             </scroll-view>
           </view>
 
           {/* Demo: Dot Loader */}
           <view className="demo-panel" style={{ display: activeDemo === "dotloader" ? "flex" : "none", flexDirection: "column", zIndex: activeDemo === "dotloader" ? 10 : 0 }}>
-            <view style={{ flex: 1, paddingTop: "60px", paddingLeft: "20px", paddingRight: "20px", paddingBottom: "20px", display: "flex", flexDirection: "column" }}>
-              <view className="back-row" bindtap={handleBackToMenu}><text className="back-text">{"< Back"}</text></view>
-              <text className="section-title">Dot Loader</text>
-              <text className="subtitle">Each dot triggers a haptic tap at the bottom of its bounce</text>
-              <view style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <view className="dot-container">
-                  <view className="dot" style={{ transform: `translateY(${dotOffsets[0]}px)` }} />
-                  <view className="dot" style={{ transform: `translateY(${dotOffsets[1]}px)` }} />
-                  <view className="dot" style={{ transform: `translateY(${dotOffsets[2]}px)` }} />
+            <scroll-view scroll-orientation="vertical" style={{ flex: 1 }}>
+              <view className="scroll-content">
+                <view className="back-row" bindtap={handleBackToMenu}><text className="back-text">{"< Back"}</text></view>
+                <text className="section-title">Wavy Dot Loader</text>
+                <text className="subtitle">Watch the three dots move in a wave pattern and feel the haptic feedback each time a dot hits the bottom.</text>
+
+                <view className="dot-loader-area">
+                  <view className="dot-container">
+                    {activeDemo === "dotloader" ? [0, 1, 2].map((i) => (
+                      <view key={i} className="dot-wrapper">
+                        <view
+                          className="dot"
+                          style={{ animationDelay: (i * 220) + "ms" }}
+                        />
+                      </view>
+                    )) : null}
+                  </view>
                 </view>
               </view>
-            </view>
+            </scroll-view>
           </view>
 
           {/* Demo: Haptic Sliders */}
@@ -866,45 +1215,54 @@ export function App() {
             <scroll-view scroll-orientation="vertical" style={{ flex: 1 }}>
               <view className="scroll-content">
                 <view className="back-row" bindtap={handleBackToMenu}><text className="back-text">{"< Back"}</text></view>
-                <text className="section-title">Haptic Sliders</text>
-                <text className="subtitle">Drag to feel haptic ticks at each 10% mark</text>
+                <text className="section-title">Slider haptics</text>
+                <text className="subtitle">Move each slider to feel different haptic characteristics. Each slider plays a unique haptic feedback when crossing ticks.</text>
 
                 <view className="slider-card">
                   <text className="slider-label">Quick Tick</text>
                   <text className="slider-value">{slider1}%</text>
-                  <view
-                    className="slider-track"
-                    bindtouchstart={handleSliderMove(1)}
-                    bindtouchmove={handleSliderMove(1)}
-                  >
-                    <view className="slider-fill" style={{ width: slider1 + "%" }} />
-                    <view className="slider-thumb" style={{ left: slider1 + "%" }} />
+                  <view className="slider-track-container" bindtouchstart={handleSliderMove(1)} bindtouchmove={handleSliderMove(1)} bindlayoutchange={handleSliderLayout(1)}>
+                    <view className="slider-track">
+                      <view className="slider-fill" style={{ width: slider1 + "%" }} />
+                    </view>
+                    <view className="slider-ticks">
+                      {[0,1,2,3,4,5,6,7,8,9,10].map((t) => (
+                        <view key={t} className={`slider-tick ${t * 10 <= slider1 ? "slider-tick-active" : ""}`} />
+                      ))}
+                    </view>
+                    <view className="slider-thumb" style={{ left: thumbLeft(slider1, 1) }} />
                   </view>
                 </view>
 
                 <view className="slider-card">
                   <text className="slider-label">Soft Tick</text>
                   <text className="slider-value">{slider2}%</text>
-                  <view
-                    className="slider-track"
-                    bindtouchstart={handleSliderMove(2)}
-                    bindtouchmove={handleSliderMove(2)}
-                  >
-                    <view className="slider-fill" style={{ width: slider2 + "%" }} />
-                    <view className="slider-thumb" style={{ left: slider2 + "%" }} />
+                  <view className="slider-track-container" bindtouchstart={handleSliderMove(2)} bindtouchmove={handleSliderMove(2)} bindlayoutchange={handleSliderLayout(2)}>
+                    <view className="slider-track">
+                      <view className="slider-fill" style={{ width: slider2 + "%" }} />
+                    </view>
+                    <view className="slider-ticks">
+                      {[0,1,2,3,4,5,6,7,8,9,10].map((t) => (
+                        <view key={t} className={`slider-tick ${t * 10 <= slider2 ? "slider-tick-active" : ""}`} />
+                      ))}
+                    </view>
+                    <view className="slider-thumb" style={{ left: thumbLeft(slider2, 2) }} />
                   </view>
                 </view>
 
                 <view className="slider-card">
                   <text className="slider-label">Deep Tick</text>
                   <text className="slider-value">{slider3}%</text>
-                  <view
-                    className="slider-track"
-                    bindtouchstart={handleSliderMove(3)}
-                    bindtouchmove={handleSliderMove(3)}
-                  >
-                    <view className="slider-fill" style={{ width: slider3 + "%" }} />
-                    <view className="slider-thumb" style={{ left: slider3 + "%" }} />
+                  <view className="slider-track-container" bindtouchstart={handleSliderMove(3)} bindtouchmove={handleSliderMove(3)} bindlayoutchange={handleSliderLayout(3)}>
+                    <view className="slider-track">
+                      <view className="slider-fill" style={{ width: slider3 + "%" }} />
+                    </view>
+                    <view className="slider-ticks">
+                      {[0,1,2,3,4,5,6,7,8,9,10].map((t) => (
+                        <view key={t} className={`slider-tick ${t * 10 <= slider3 ? "slider-tick-active" : ""}`} />
+                      ))}
+                    </view>
+                    <view className="slider-thumb" style={{ left: thumbLeft(slider3, 3) }} />
                   </view>
                 </view>
               </view>
@@ -927,13 +1285,14 @@ export function App() {
                       bindtouchstart={handleBalloonStart(i)}
                       bindtouchend={handleBalloonEnd(i)}
                     >
-                      <view style={{ display: balloonPopped[i] ? "none" : "flex", alignItems: "center" }}>
-                        <text className="balloon-emoji" style={{ transform: `scale(${0.5 + balloonProgress[i] * 0.8})` }}>{"\u{1F388}"}</text>
-                        <text className="balloon-hint">{Math.round(balloonProgress[i] * 100)}%</text>
-                      </view>
-                      <view style={{ display: balloonPopped[i] ? "flex" : "none", alignItems: "center" }}>
-                        <text className="balloon-popped">POP!</text>
-                      </view>
+                      {balloonPopped[i] ? (
+                        <text className="balloon-popped">{"\u{1F4A5}"}</text>
+                      ) : (
+                        <view style={{ alignItems: "center" }}>
+                          <text className="balloon-emoji" style={{ transform: `scale(${0.5 + balloonProgress[i] * 0.8})` }}>{"\u{1F388}"}</text>
+                          <text className="balloon-hint">{Math.round(balloonProgress[i] * 100)}%</text>
+                        </view>
+                      )}
                     </view>
                   ))}
                 </view>
@@ -969,15 +1328,19 @@ export function App() {
       {/* Bottom Tab Bar */}
       <view className="tab-bar">
         <view className={`tab ${activeTab === "home" ? "tab-active" : ""}`} bindtap={handleTabHome}>
+          <image src={activeTab === "home" ? iconHomeActive : iconHomeInactive} style={{ width: "24px", height: "24px" }} />
           <text className={`tab-label ${activeTab === "home" ? "tab-label-active" : ""}`}>Home</text>
         </view>
         <view className={`tab ${activeTab === "presets" ? "tab-active" : ""}`} bindtap={handleTabPresets}>
+          <image src={activeTab === "presets" ? iconListActive : iconListInactive} style={{ width: "24px", height: "24px" }} />
           <text className={`tab-label ${activeTab === "presets" ? "tab-label-active" : ""}`}>Presets</text>
         </view>
         <view className={`tab ${activeTab === "playground" ? "tab-active" : ""}`} bindtap={handleTabPlayground}>
+          <image src={activeTab === "playground" ? iconBrushActive : iconBrushInactive} style={{ width: "24px", height: "24px" }} />
           <text className={`tab-label ${activeTab === "playground" ? "tab-label-active" : ""}`}>Playground</text>
         </view>
         <view className={`tab ${activeTab === "demos" ? "tab-active" : ""}`} bindtap={handleTabDemos}>
+          <image src={activeTab === "demos" ? iconSparklesActive : iconSparklesInactive} style={{ width: "24px", height: "24px" }} />
           <text className={`tab-label ${activeTab === "demos" ? "tab-label-active" : ""}`}>Demos</text>
         </view>
       </view>

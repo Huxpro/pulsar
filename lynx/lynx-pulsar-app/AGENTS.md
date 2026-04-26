@@ -82,7 +82,12 @@ Unlike CSS on web where `flex-direction` defaults to `row`, many developers assu
 ```
 Apply the same pattern for ANY nested show/hide (e.g. demo sub-views within the Demos tab).
 
-### 3. ALL CSS length values MUST have `px` units
+### 3. NEVER use `key` to force remount or `display:none` inside `.map()`
+Both cause `snapshotPatchApply` / `insertBefore` crashes. Instead:
+- Use `opacity: 0/1` + `position: absolute` + `zIndex` to show/hide elements within a list
+- Never use dynamic `key` to trigger re-render animations — the main thread snapshot can't handle element insertion/removal
+
+### 4. ALL CSS length values MUST have `px` units
 ```tsx
 // WRONG
 style={{ marginTop: 24 }}
