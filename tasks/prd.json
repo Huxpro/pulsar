@@ -1,0 +1,167 @@
+{
+  "project": "Pulsar",
+  "branchName": "ralph/lynx-adapter",
+  "description": "Lynx Platform Adapter — enable Lynx apps to use Pulsar haptic presets, pattern composer, and settings via Lynx Native Modules, reusing the existing iOS Swift and Android Kotlin SDKs",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Verify synchronous return values work in Lynx Native Modules",
+      "description": "As a developer, I need to confirm that Lynx Native Module methods can return values synchronously (number, boolean) since parsePattern() and hapticSupport() rely on this.",
+      "acceptanceCriteria": [
+        "Create a minimal test Lynx Native Module on Android with a method returning Int/Double",
+        "Create a minimal test Lynx Native Module on iOS with a method returning NSNumber",
+        "Document how to verify JS receives the return value on both platforms",
+        "If synchronous returns are NOT supported, document a callback-based fallback design: parsePattern(data, callback) where callback receives patternId, and hapticSupport(callback) where callback receives the level",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "This is a blocking validation. If sync returns don't work, US-003 and US-006 interfaces change to use callbacks for hapticSupport() and parsePattern(). Write the test modules in a lynx/lynx-pulsar/test-sync-returns/ throwaway directory."
+    },
+    {
+      "id": "US-002",
+      "title": "TypeScript NativeModule interface and enums",
+      "description": "As a Lynx app developer, I need a TypeScript interface that declares the PulsarModule on NativeModules so I can call haptic methods from JS.",
+      "acceptanceCriteria": [
+        "Create lynx/lynx-pulsar/src/NativePulsar.ts with declare let NativeModules typing for PulsarModule",
+        "Interface exposes Pulsar methods: play(name: string), enableHaptics(state: boolean), enableSound(state: boolean), enableCache(state: boolean), clearCache(), preloadPresets(names: string[]), stopHaptics(), shutDownEngine(), hapticSupport(): number, forceHapticsSupportLevel(level: number), enableImpulseCompositionMode(state: boolean), setRealtimeComposerStrategy(strategy: number)",
+        "Interface exposes PatternComposer methods: parsePattern(data: object): number, patternPlay(id: number), patternStop(id: number), patternRelease(id: number)",
+        "Export HapticSupport enum with values NO_SUPPORT=0 through ADVANCED_SUPPORT=4",
+        "Export RealtimeComposerStrategy enum with values ENVELOPE=0 through ENVELOPE_WITH_DISCRETE_PRIMITIVES=3",
+        "Export default as NativeModules.PulsarModule",
+        "No imports from react-native — only Lynx globals",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Reference react-native/react-native-pulsar/src/NativeRNPulsar.ts for the full method list. Adapt TurboModule pattern to Lynx NativeModules global. Method names drop the Pulsar_/RealtimeComposer_/PatternComposer_ prefixes used in the RN version since Lynx methodLookup handles the mapping."
+    },
+    {
+      "id": "US-003",
+      "title": "Types and Pattern definitions",
+      "description": "As a Lynx app developer, I need shared type definitions for Pattern, PatternComposer, and related types.",
+      "acceptanceCriteria": [
+        "Create lynx/lynx-pulsar/src/types.ts with Pattern type: { discretePattern: { time: number, amplitude: number, frequency: number }[], continuousPattern: { amplitude: { time: number, value: number }[], frequency: { time: number, value: number }[] } }",
+        "Export PatternComposer type with play(), stop(), parse(pattern), isParsed() methods",
+        "Export AdaptivePresetConfig as (() => void) | Pattern",
+        "Export AdaptivePreset as { ios: AdaptivePresetConfig, android: AdaptivePresetConfig, lynx?: AdaptivePresetConfig }",
+        "Export AdaptiveHaptics as { play: () => void }",
+        "Types match react-native/react-native-pulsar/src/types.ts with the addition of the lynx field on AdaptivePreset",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Reference react-native/react-native-pulsar/src/types.ts. Nearly identical, just adds optional lynx field to AdaptivePreset."
+    },
+    {
+      "id": "US-004",
+      "title": "Presets API",
+      "description": "As a Lynx app developer, I want to call Presets.dogBark() to trigger a haptic preset, matching the React Native API.",
+      "acceptanceCriteria": [
+        "Create lynx/lynx-pulsar/src/Presets.ts exporting a default object with all preset functions",
+        "Each preset function calls Pulsar.play(presetName) where Pulsar is the imported NativePulsar default export",
+        "No 'worklet' directives anywhere in the file",
+        "System presets included under System namespace: impactLight, impactMedium, impactHeavy, impactSoft, impactRigid, notificationSuccess, notificationWarning, notificationError, selection",
+        "Android-specific system presets under System.Android namespace: effectClick, effectDoubleClick, effectTick, effectHeavyClick, primitiveClick, primitiveLowTick, etc. (all entries from RN Presets.ts)",
+        "All 150+ custom presets included: afterglow through zipper (match CODEGEN section of RN Presets.ts)",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "This is mechanical translation from react-native/react-native-pulsar/src/Presets.ts. Remove all 'worklet' directives, change import from ./NativeRNPulsar to ./NativePulsar. Keep the exact same preset names and structure."
+    },
+    {
+      "id": "US-005",
+      "title": "Settings API",
+      "description": "As a Lynx app developer, I want to configure the haptic engine (enable/disable haptics, manage cache, query support level).",
+      "acceptanceCriteria": [
+        "Create lynx/lynx-pulsar/src/Settings.ts importing from ./NativePulsar",
+        "Export default Settings object with methods: enableHaptics(state: boolean), enableSound(state: boolean), enableCache(state: boolean), clearCache(), preloadPresets(presetNames: string[]), stopHaptics(), shutDownEngine(), getHapticsSupportLevel(): HapticSupport, forceHapticsSupportLevel(level: HapticSupport), enableImpulseCompositionMode(state: boolean), setRealtimeComposerStrategy(strategy: RealtimeComposerStrategy)",
+        "Each method delegates to the corresponding NativePulsar method",
+        "API shape matches react-native/react-native-pulsar/src/Settings.ts",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Reference react-native/react-native-pulsar/src/Settings.ts. Nearly identical, just change the import source and remove the RN prototype caching workaround lines."
+    },
+    {
+      "id": "US-006",
+      "title": "PatternComposer hook",
+      "description": "As a Lynx app developer, I want to compose custom haptic patterns using usePatternComposer with the same Pattern type as React Native.",
+      "acceptanceCriteria": [
+        "Create lynx/lynx-pulsar/src/usePatternComposer.ts using useCallback and useEffect from @lynx-js/react",
+        "Hook accepts optional Pattern argument, calls Pulsar.parsePattern(data) which returns a patternId",
+        "play() calls Pulsar.patternPlay(patternId) if patternId is valid",
+        "stop() calls Pulsar.patternStop(patternId) if patternId is valid",
+        "parse(pattern) calls Pulsar.parsePattern(pattern) and stores the returned patternId in a ref",
+        "useEffect cleanup calls Pulsar.patternRelease(patternId) on unmount",
+        "Returns { play, stop, parse, isParsed } matching the PatternComposer type",
+        "No 'worklet' directives",
+        "No dependency on react-native-reanimated or useSharableState — use useRef instead",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Reference react-native/react-native-pulsar/src/usePatternComposer.ts. Key change: replace useSharableState (Reanimated) with useRef from @lynx-js/react for storing patternId. Remove all 'worklet' directives."
+    },
+    {
+      "id": "US-007",
+      "title": "Package entry point and package.json",
+      "description": "As a Lynx app developer, I want to import { Presets, Settings, usePatternComposer } from 'lynx-pulsar'.",
+      "acceptanceCriteria": [
+        "Create lynx/lynx-pulsar/src/index.tsx re-exporting: Presets (default from ./Presets), Settings (default from ./Settings), usePatternComposer (default from ./usePatternComposer)",
+        "Re-export types: Pattern, PatternComposer, AdaptivePreset, AdaptivePresetConfig, AdaptiveHaptics from ./types",
+        "Re-export enums: HapticSupport, RealtimeComposerStrategy from ./NativePulsar",
+        "Do NOT export useRealtimeComposer or useAdaptiveHaptics (deferred to phase 2)",
+        "Create lynx/lynx-pulsar/package.json with name lynx-pulsar, @lynx-js/react as peerDependency",
+        "Create lynx/lynx-pulsar/tsconfig.json for TypeScript compilation",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Reference react-native/react-native-pulsar/src/index.tsx and react-native/react-native-pulsar/package.json for structure. Adapt dependencies from react-native to @lynx-js/react."
+    },
+    {
+      "id": "US-008",
+      "title": "iOS LynxModule bridge",
+      "description": "As a Lynx app developer on iOS, I need the native module registered so JS calls reach the Swift Pulsar SDK.",
+      "acceptanceCriteria": [
+        "Mirror iOS Swift SDK sources from iOS/Pulsar/Sources/Pulsar/ into lynx/lynx-pulsar/deps/Pulsar/ (same strategy as react-native/react-native-pulsar/deps/Pulsar/)",
+        "Create lynx/lynx-pulsar/ios/PulsarLynxModule.h declaring the module interface conforming to LynxModule protocol",
+        "Create lynx/lynx-pulsar/ios/PulsarLynxModule.m implementing the module",
+        "+name returns @\"PulsarModule\"",
+        "+methodLookup maps all JS method names (play, enableHaptics, hapticSupport, parsePattern, patternPlay, patternStop, patternRelease, etc.) to ObjC selectors",
+        "Module holds Pulsar* instance, creates it in init",
+        "play: delegates to [[pulsar getPresets] getByName:name] play]",
+        "parsePattern: creates PatternComposer from pattern data, stores in NSMutableDictionary registry keyed by pattern ID, returns the ID",
+        "patternPlay/patternStop/patternRelease: look up PatternComposer by ID and call play/stop/release",
+        "All settings methods delegate to corresponding Pulsar SDK methods",
+        "Include registration example comment in header: [globalConfig registerModule:PulsarLynxModule.class]"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Reference react-native/react-native-pulsar/ios/Haptics.mm for the implementation pattern. The logic is nearly identical — just swap TurboModule boilerplate for LynxModule protocol (+name, +methodLookup). Import Lynx/LynxModule.h instead of React headers."
+    },
+    {
+      "id": "US-009",
+      "title": "Android LynxModule bridge",
+      "description": "As a Lynx app developer on Android, I need the native module registered so JS calls reach the Kotlin Pulsar SDK.",
+      "acceptanceCriteria": [
+        "Create lynx/lynx-pulsar/android/src/main/java/com/swmansion/pulsar/PulsarLynxModule.kt extending LynxModule",
+        "Constructor takes Context parameter, initializes Pulsar instance and RealtimeComposer",
+        "All public methods annotated with @LynxMethod",
+        "play(name: String) delegates to pulsar.getPresets().getByName(name)?.play()",
+        "parsePattern(data: ReadableMap): Int parses pattern data, creates PatternComposer, stores in MutableMap<Int, PatternComposer> registry, returns ID",
+        "patternPlay/patternStop/patternRelease look up PatternComposer by ID",
+        "All settings methods (enableHaptics, enableSound, enableCache, clearCache, preloadPresets, stopHaptics, shutDownEngine, hapticSupport, forceHapticsSupportLevel, enableImpulseCompositionMode, setRealtimeComposerStrategy) delegate to Pulsar SDK",
+        "hapticSupport() returns Double mapping from CompatibilityMode enum",
+        "Include registration example comment: LynxEnv.inst().registerModule(\"PulsarModule\", PulsarLynxModule::class.java)",
+        "Create build.gradle with Lynx SDK dependency and source sets including the Kotlin Pulsar SDK sources"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "Reference react-native/react-native-pulsar/android/src/main/java/com/swmansion/pulsar/PulsarModule.kt for the implementation pattern. Key changes: extend LynxModule instead of NativeRNPulsarSpec, use @LynxMethod instead of override, constructor takes Context instead of ReactApplicationContext."
+    }
+  ]
+}

@@ -33,6 +33,12 @@ interface PulsarModule {
   patternPlay(id: number): void;
   patternStop(id: number): void;
   patternRelease(id: number): void;
+
+  // RealtimeComposer
+  realtimeSet(amplitude: number, frequency: number): void;
+  realtimePlayDiscrete(amplitude: number, frequency: number): void;
+  realtimeStop(): void;
+  realtimeIsActive(): boolean;
 }
 
 declare const NativeModules: {
