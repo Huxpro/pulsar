@@ -4,41 +4,55 @@ A ReactLynx port of [Software Mansion's Pulsar](https://github.com/software-mans
 
 This directory (`lynx/lynx-pulsar-app/`) is the polished demo app. The sibling `lynx/lynx-pulsar/` is the Lynx adapter library it depends on, mirroring the React Native TurboModule shipped at `react-native/react-native-pulsar/`.
 
+The runtime host is **Lynx Pulsar** — our customized fork of the upstream `LynxExplorer.app` at `~/github/lynx-pulsar-explorer/`. It carries `PulsarLynxModule` (the native bridge), the Pulsar Swift SDK, the app's display name + icons, and a Release-only Xcode build phase that bakes the rspeedy bundle into `.app/Resource/homepage.lynx.bundle`. Release archives boot straight into Pulsar; Debug archives keep the original Lynx-Explorer "Bundle URL" home card for live reload against `rspeedy dev`.
+
 ---
 
-## One-Shot Build Prompt (for an AI agent)
+## One-shot build prompt (for an AI agent)
 
-> You are building the Pulsar Lynx app and launching it on the **already-booted iOS Simulator**. Follow these steps in order, halt on any error, and report progress concisely.
+> You are building **Lynx Pulsar.app** — a self-contained iOS app whose JS bundle is compiled in at archive time — and installing it on the user's chosen target (booted iOS Simulator by default, physical iPhone if `--device` is passed). Halt on any error, report progress concisely, and do not modify `iOS/`, `Android/`, or `react-native/` (those are upstream sources).
 >
-> 1. `cd lynx/lynx-pulsar && npm install`
-> 2. `cd ../lynx-pulsar-app && npm install`
-> 3. Confirm the iOS Simulator is booted: `xcrun simctl list devices booted` — abort if none.
-> 4. Locate a `LynxExplorer.app` build for iphonesimulator. Check `~/github/lynx-pulsar-explorer/explorer/darwin/ios/lynx_explorer/build/Build/Products/Debug-iphonesimulator/LynxExplorer.app` first; if absent, follow `lynx/AGENTS.md → LynxExplorer Integration (iOS)` to build it (heavy: ~30 min first time due to PrimJS pod download).
-> 5. `xcrun simctl install booted <path-to>/LynxExplorer.app`
-> 6. Start the bundler in the background: `cd lynx/lynx-pulsar-app && npm run dev`. Wait until it prints `Lynx http://<host>:<port>/main.lynx.bundle`. Capture `<port>` (defaults to 3000, rolls to 3003 if taken).
-> 7. **Swap the homepage bundle so LynxExplorer auto-loads Pulsar on launch.** Pulsar's assets are referenced via HTTP and `NSAllowsArbitraryLoads` is enabled in the host, so the dev server serves the images:
+> 1. Install JS deps:
 >    ```bash
->    APP_BUNDLE=$(xcrun simctl get_app_container booted com.huxpro.lynx.pulsar)
->    cp "$APP_BUNDLE/Resource/homepage.lynx.bundle" /tmp/homepage.lynx.bundle.bak  # restore later
->    curl -s "http://127.0.0.1:<port>/main.lynx.bundle" -o "$APP_BUNDLE/Resource/homepage.lynx.bundle"
+>    ( cd lynx/lynx-pulsar && npm install --no-audit --no-fund )
+>    ( cd lynx/lynx-pulsar-app && npm install --no-audit --no-fund )
 >    ```
-> 8. Launch:
+> 2. Verify the host project exists at `~/github/lynx-pulsar-explorer/explorer/darwin/ios/lynx_explorer/LynxExplorer.xcworkspace`. If missing, follow `lynx/AGENTS.md → LynxExplorer Integration (iOS)` to set it up (one-time, ~30 min for the initial `pod install`).
+> 3. Confirm the build phase is present:
 >    ```bash
->    xcrun simctl terminate booted com.huxpro.lynx.pulsar 2>/dev/null
+>    grep -q "Bundle Pulsar Lynx code" \
+>      ~/github/lynx-pulsar-explorer/explorer/darwin/ios/lynx_explorer/LynxExplorer.xcodeproj/project.pbxproj
+>    ```
+>    If absent, re-apply it (see `## How the Release path works` below).
+> 4. **Simulator path** — Release build for the currently booted simulator:
+>    ```bash
+>    DEVICE_ID=$(xcrun simctl list devices booted -j | python3 -c 'import sys,json; print(json.load(sys.stdin)["devices"].values().__iter__().__next__()[0]["udid"])')
+>    cd ~/github/lynx-pulsar-explorer/explorer/darwin/ios/lynx_explorer
+>    xcodebuild -workspace LynxExplorer.xcworkspace -scheme LynxExplorer \
+>      -configuration Release \
+>      -destination "platform=iOS Simulator,id=$DEVICE_ID" \
+>      -derivedDataPath build clean build
+>    xcrun simctl install booted build/Build/Products/Release-iphonesimulator/LynxExplorer.app
 >    xcrun simctl launch booted com.huxpro.lynx.pulsar
 >    sleep 4
->    ```
-> 9. Verify success: take a screenshot, resize, and read it:
->    ```bash
 >    xcrun simctl io booted screenshot /tmp/pulsar-verify.png
 >    sips -Z 900 /tmp/pulsar-verify.png --out /tmp/pulsar-verify-small.png
 >    ```
->    The Home tab should show `Welcome to Pulsar!`, a "Connect device" card with a "Connecting code" field, and a four-icon bottom tab bar (Home / Presets / Playground / Demos). Halt if the screenshot still shows the white "Bundle URL" card — that means the swap was bypassed (likely a stale install).
-> 10. Cleanup hint for the user: `cp /tmp/homepage.lynx.bundle.bak "$APP_BUNDLE/Resource/homepage.lynx.bundle"` restores the original Lynx Explorer home card.
->
-> Do not modify `iOS/`, `Android/`, or `react-native/` — those are upstream sources. If a step fails, read the **Troubleshooting** section below before retrying. Stop and ask the user if a step needs credentials or a destructive action.
->
-> Do not modify `iOS/`, `Android/`, or `react-native/` — those are upstream sources. If the build fails, read the **Troubleshooting** section below before retrying. Stop and ask the user if a step needs credentials or a destructive action.
+>    Read `/tmp/pulsar-verify-small.png` and confirm the Home tab shows `Welcome to Pulsar!` plus the four-icon tab bar. If you still see a white "Bundle URL" card, the Run Script Build Phase didn't run — re-read step 3.
+> 5. **Physical device path** — discover the device UDID, then archive + install:
+>    ```bash
+>    xcrun devicectl list devices --json-output /tmp/devices.json
+>    DEVICE_UDID=$(python3 -c 'import json; ds=json.load(open("/tmp/devices.json"))["result"]["devices"]; print(next(d["identifier"] for d in ds if d["connectionProperties"]["pairingState"]=="paired" and "iPhone" in d["deviceProperties"]["name"]))')
+>    cd ~/github/lynx-pulsar-explorer/explorer/darwin/ios/lynx_explorer
+>    xcodebuild -workspace LynxExplorer.xcworkspace -scheme LynxExplorer \
+>      -configuration Release \
+>      -destination "generic/platform=iOS" \
+>      -allowProvisioningUpdates \
+>      -derivedDataPath build clean build
+>    xcrun devicectl device install app --device "$DEVICE_UDID" \
+>      build/Build/Products/Release-iphoneos/LynxExplorer.app
+>    ```
+>    Ask the user to launch "Lynx Pulsar" from their home screen and confirm Home renders. First time on a device requires trusting the cert: *Settings → General → VPN & Device Management → Trust "Apple Development: huxpro@gmail.com"*.
 
 ---
 
@@ -54,100 +68,120 @@ This directory (`lynx/lynx-pulsar-app/`) is the polished demo app. The sibling `
   - `src/App.css` (~1k LOC) — Pulsar palette + layout
   - `src/assets/presets/*.png` — 151 preset thumbnails
   - `src/assets/icons/*.png` — tab bar icons
-- **Runtime** — the JS bundle is loaded by **LynxExplorer.app**, an iOS host that registers `PulsarLynxModule` natively so JS calls cross into `CoreHaptics`.
+- **Lynx Pulsar.app** — the iOS host at `~/github/lynx-pulsar-explorer/` (worktree of `lynx-stack`). Has the Pulsar Swift SDK linked, `PulsarLynxModule` registered, the official PulsarApp's icon copied in, `CFBundleDisplayName = "Lynx Pulsar"`, and a Release-only Xcode build phase that copies our bundle into the app's `Resource/`.
 
 ## Prerequisites
 
-- macOS with Xcode 15+ (for the iOS Simulator and `xcrun`)
+- macOS with Xcode 15+ (for the iOS Simulator, `xcrun`, and `devicectl`)
 - Node 18+, npm 9+
-- A booted iOS Simulator (the build target is iPhone 17 Pro, simulator id `EABC0BC7-12FE-4940-969C-FF3D6B9135F5`; any iPhone running iOS 15+ works)
-- **For the native shell** (one-time, ~30 min): the `lynx-stack` monorepo cloned and a worktree at `~/github/lynx-pulsar-explorer` with `pod install` completed. See `lynx/AGENTS.md → LynxExplorer Integration (iOS)`.
+- A booted iOS Simulator **or** a paired physical iPhone running iOS 15+
+- The customized `LynxExplorer.app` host worktree at `~/github/lynx-pulsar-explorer/` with `pod install` completed. One-time setup is in `lynx/AGENTS.md → LynxExplorer Integration (iOS)`.
 
-## Quick start (with a pre-built LynxExplorer.app)
+## How the Release path works
 
-```bash
-# 1. Install adapter + app deps
-( cd lynx/lynx-pulsar && npm install )
-( cd lynx/lynx-pulsar-app && npm install )
+When you `xcodebuild ... -configuration Release` the LynxExplorer workspace, an Xcode Run Script Build Phase named **"Bundle Pulsar Lynx code"** runs after compile:
 
-# 2. Install the host onto the booted simulator
-xcrun simctl install booted \
-  ~/github/lynx-pulsar-explorer/explorer/darwin/ios/lynx_explorer/build/Build/Products/Debug-iphonesimulator/LynxExplorer.app
-
-# 3. Start the bundler (background) — note the URL it prints, port defaults to 3000 but rolls to 3003 if taken
-( cd lynx/lynx-pulsar-app && npm run dev ) &
-
-# 4. Swap LynxExplorer's bundled homepage with Pulsar so it auto-loads
-APP_BUNDLE=$(xcrun simctl get_app_container booted com.huxpro.lynx.pulsar)
-cp "$APP_BUNDLE/Resource/homepage.lynx.bundle" /tmp/homepage.lynx.bundle.bak
-curl -s "http://127.0.0.1:3003/main.lynx.bundle" -o "$APP_BUNDLE/Resource/homepage.lynx.bundle"
-
-# 5. Launch & screenshot
-xcrun simctl terminate booted com.huxpro.lynx.pulsar 2>/dev/null
-xcrun simctl launch booted com.huxpro.lynx.pulsar
-sleep 4
-xcrun simctl io booted screenshot /tmp/pulsar-verify.png
-sips -Z 900 /tmp/pulsar-verify.png --out /tmp/pulsar-verify-small.png
-open /tmp/pulsar-verify-small.png
-
-# 6. (Optional) Restore Lynx Explorer's original home card
-cp /tmp/homepage.lynx.bundle.bak "$APP_BUNDLE/Resource/homepage.lynx.bundle"
+```sh
+if [[ "$CONFIGURATION" != *Release* ]]; then exit 0; fi
+LYNX_APP_DIR="${LYNX_PULSAR_APP_DIR:-$HOME/github/pulsar/lynx/lynx-pulsar-app}"
+cd "$LYNX_APP_DIR" && npm run build
+cp "$LYNX_APP_DIR/dist/main.lynx.bundle" "$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/homepage.lynx.bundle"
 ```
 
-## Full path (building LynxExplorer from scratch)
+It is gated on `CONFIGURATION` so Debug builds skip it. The destination — `homepage.lynx.bundle` inside the `.app`'s `Resource/` — is the file `LynxExplorer`'s `AppDelegate.mm` loads on launch (`file://lynx?local://homepage.lynx.bundle?fullscreen=true`). Net effect: Release archive boots straight into Pulsar without a dev server.
 
-The native host depends on the `lynx-stack` monorepo because the Lynx C++ pods are referenced via `:path`. The full procedure lives in **`lynx/AGENTS.md`** under *LynxExplorer Integration (iOS)*. Highlights:
+To (re-)install the phase from a checkout that doesn't yet have it (e.g. you just refreshed the LynxExplorer worktree from upstream), run:
 
-1. Clone `lynx-infra/lynx` into `~/github/lynx`.
-2. Create a worktree: `git worktree add ~/github/lynx-pulsar-explorer pulsar-explorer`.
-3. Copy the Pulsar Swift sources into `LynxExplorer/modules/Pulsar/`.
-4. Drop `PulsarLynxModule.{h,m}` into `LynxExplorer/modules/` and register it in `LynxInitProcessor.m`.
-5. Set `SWIFT_VERSION = 5.0`, `IPHONEOS_DEPLOYMENT_TARGET = 15.0`, bundle id `com.huxpro.lynx.pulsar`.
-6. `bundle exec pod install` (~20-30 min the first time).
-7. `xcodebuild -workspace LynxExplorer.xcworkspace -scheme LynxExplorer -destination 'platform=iOS Simulator,id=EABC0BC7-12FE-4940-969C-FF3D6B9135F5' build`.
+```bash
+/opt/homebrew/opt/ruby/bin/ruby <<'RB'
+require 'xcodeproj'
+PROJECT = File.expand_path("~/github/lynx-pulsar-explorer/explorer/darwin/ios/lynx_explorer/LynxExplorer.xcodeproj")
+NAME = "Bundle Pulsar Lynx code"
+SCRIPT = <<~SH
+  set -euo pipefail
+  if [[ "$CONFIGURATION" != *Release* ]]; then echo "Pulsar Lynx: skip Debug"; exit 0; fi
+  LYNX_APP_DIR="${LYNX_PULSAR_APP_DIR:-$HOME/github/pulsar/lynx/lynx-pulsar-app}"
+  cd "$LYNX_APP_DIR"
+  if [ ! -d node_modules ]; then ( cd ../lynx-pulsar && npm install --no-audit --no-fund ); npm install --no-audit --no-fund; fi
+  PATH="/opt/homebrew/bin:/usr/local/bin:$PATH" npm run build
+  cp "$LYNX_APP_DIR/dist/main.lynx.bundle" "$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/homepage.lynx.bundle"
+SH
+project = Xcodeproj::Project.open(PROJECT)
+target = project.targets.find { |t| t.name == "LynxExplorer" }
+phase = target.build_phases.find { |p| p.respond_to?(:name) && p.name == NAME } ||
+        target.new_shell_script_build_phase(NAME)
+phase.shell_path = "/bin/bash"
+phase.shell_script = SCRIPT
+phase.always_out_of_date = "1"
+project.save
+RB
+```
+
+## How the Debug path works
+
+A `Debug`-configured `LynxExplorer.app` skips the bundle bake. On launch it shows the standard "Bundle URL" home card; this is where you paste a `rspeedy dev` URL for hot reload:
+
+```bash
+( cd lynx/lynx-pulsar-app && npm run dev ) &
+# rspeedy prints: ➜  Lynx http://<host>:<port>/main.lynx.bundle
+echo "http://127.0.0.1:<port>/main.lynx.bundle?fullscreen=true" | xcrun simctl pbcopy booted
+xcrun simctl launch booted com.huxpro.lynx.pulsar
+# In the Simulator: tap the URL field → long-press → Paste → tap Go.
+```
 
 ## Verification checklist
 
-A successful build shows all four below:
-
-- [ ] `dist/main.lynx.bundle` exists after `npm run dev` (or `npm run build`).
-- [ ] `curl -sI http://127.0.0.1:<port>/main.lynx.bundle` returns `200`.
-- [ ] `xcrun simctl get_app_container booted com.huxpro.lynx.pulsar` resolves a path.
-- [ ] After launch, the simulator shows `Welcome to Pulsar!` and the four-icon bottom tab bar (Home / Presets / Playground / Demos). The "Connect device" card is visible on Home.
-- [ ] Tapping a preset card produces a haptic on a physical device (simulator has no haptic engine; the JS `INVOKE` line still appears in the rspeedy terminal).
+- [ ] `~/github/lynx-pulsar-explorer/.../LynxExplorer.xcodeproj/project.pbxproj` contains `"Bundle Pulsar Lynx code"`.
+- [ ] `dist/main.lynx.bundle` exists after `npm run build` (Release) or `npm run dev` (Debug).
+- [ ] The installed app shows `Lynx Pulsar` under its icon on the home screen, with the Pulsar icon (white phone, navy ring, magenta dot).
+- [ ] Launching the Release-installed app goes straight to `Welcome to Pulsar!` + four-icon tab bar — no Bundle-URL card.
+- [ ] Tapping a preset card produces a haptic on a physical device (the simulator has no haptic engine; the JS `INVOKE` line still shows in the rspeedy terminal in Debug).
 
 ## Troubleshooting
 
 | Symptom | Cause / Fix |
 |---|---|
-| `xcrun simctl install` errors with "no devices booted" | Run `xcrun simctl boot 'iPhone 17 Pro'` first, or open Simulator.app and pick a device. |
-| Simulator launches but shows blank Lynx Explorer home screen | `npm run dev` not running, or the bundle URL is wrong. Re-check `rspeedy dev` output for the served `.lynx.bundle` URL. |
-| `Snapshot not found` runtime error in LynxExplorer | Conditional JSX or multi-file component imports. See `lynx/AGENTS.md → ReactLynx Critical Rules`. |
+| Release build runs forever on first try | The Run Script does a clean `npm install` for both `lynx-pulsar` and `lynx-pulsar-app` plus a `rspeedy build`. Subsequent builds reuse `node_modules`. |
+| Run Script aborts with "LYNX_APP_DIR not found" | The Lynx app source must live at `~/github/pulsar/lynx/lynx-pulsar-app`. Either symlink there, or override by adding `LYNX_PULSAR_APP_DIR = <abs-path>` to your Xcode user xcconfig. |
+| `npm: command not found` during the build phase | Xcode runs scripts with a stripped PATH. The phase prepends `/opt/homebrew/bin:/usr/local/bin`; if your `npm` lives elsewhere, edit the phase script. |
+| Debug install still shows old "Lynx Explorer" name / icon | The simulator caches the previous bundle. `xcrun simctl uninstall booted com.huxpro.lynx.pulsar` then reinstall. |
+| Physical device install fails with provisioning error | Make sure your Apple ID is added to Xcode > Settings > Accounts, and your iPhone is paired and unlocked. `-allowProvisioningUpdates` will create a free dev cert for `com.huxpro.lynx.pulsar` automatically. |
+| First launch on device shows "Untrusted Developer" | Settings → General → VPN & Device Management → Trust the cert. |
+| Pod install stuck on PrimJS | Normal first time (~20-30 min). Subsequent installs reuse the cache. |
+| `Snapshot not found` runtime error | Conditional JSX or multi-file component imports in `App.tsx`. See `lynx/AGENTS.md → ReactLynx Critical Rules`. |
 | Build fails with `text-transform is not supported` | Lynx CSS limitation — remove the property; capitalize in source instead. |
 | `npm install` complains about peer `@lynx-js/react` | The adapter pins `0.116.4`; do not upgrade across minor versions without re-testing against `pluginReactLynx`. |
-| Pod install stuck on PrimJS | Normal first time (~20-30 min). Subsequent installs reuse the cache. |
-| `com.huxpro.lynx.pulsar` bundle id rejected | You're building the host yourself — change to your own team's id in Xcode project settings. |
-| Bundle swap didn't take effect (still seeing Bundle URL card) | The app container path changes on every reinstall. Re-run `APP_BUNDLE=$(xcrun simctl get_app_container booted com.huxpro.lynx.pulsar)` between installs. Also confirm `xcrun simctl terminate` actually killed the previous process before relaunching. |
-| Want to load the bundle without swapping (manual path) | Don't swap. Instead seed the pasteboard (`echo "$URL" \| xcrun simctl pbcopy booted`), launch the app, then in the Simulator tap the URL field → long-press → Paste → tap Go. |
 
 ## Project topology
 
 ```
-pulsar/                                  # software-mansion/pulsar (upstream)
+pulsar/                                  # software-mansion/pulsar (this fork: huxpro/pulsar)
 ├── iOS/                                 # upstream Swift SDK — do not modify
 ├── Android/                             # upstream Kotlin SDK — do not modify
 ├── react-native/react-native-pulsar/    # upstream RN adapter — do not modify
-├── PulsarApp/                           # upstream Expo app (the port source)
+├── PulsarApp/                           # upstream Expo app (the port source for App.tsx + icons)
 └── lynx/                                # this fork's additions
     ├── lynx-pulsar/                     # Lynx adapter library
     ├── lynx-pulsar-demo/                # SDK harness (ports react-native/PulsarApp/)
     ├── lynx-pulsar-app/                 # ← you are here; ports PulsarApp/
     └── AGENTS.md                        # native-side knowledge base
+
+~/github/lynx-pulsar-explorer/           # LynxExplorer worktree (lynx-stack), NOT in this repo
+└── explorer/darwin/ios/lynx_explorer/
+    ├── LynxExplorer.xcodeproj           # ← contains "Bundle Pulsar Lynx code" phase
+    ├── LynxExplorer/
+    │   ├── Info.plist                   # CFBundleDisplayName = "Lynx Pulsar"
+    │   ├── Assets.xcassets/AppIcon.../  # Pulsar 1024 PNG → all sizes via sips
+    │   └── modules/
+    │       ├── Pulsar/Sources/Pulsar/   # mirrored Pulsar Swift SDK
+    │       └── PulsarLynxModule.{h,m}   # NativeModule bridge
+    └── ...
 ```
 
 ## References
 
-- `lynx/AGENTS.md` — ReactLynx rules, CSS gotchas, LynxExplorer iOS integration
+- `lynx/AGENTS.md` — ReactLynx rules, CSS gotchas, LynxExplorer iOS integration (initial pod install, signing)
 - `lynx/lynx-pulsar-app/AGENTS.md` — source reference, design system, CSS lessons
 - `tasks/prd-lynx-adapter.md` — adapter PRD (9 user stories)
 - `lynx/lynx-pulsar-app/tasks/prd-demos-hifi.md` — Demos tab port PRD
+- `~/github/lynx-dev-clients-pulsar/PLAN.md` — long-term plan for generalizing the Run Script + provider story into a `LynxDevClient` package
