@@ -79,7 +79,11 @@ The runtime host is **Lynx Pulsar** — our customized fork of the upstream `Lyn
 
 ## How the Release path works
 
-When you `xcodebuild ... -configuration Release` the LynxExplorer workspace, an Xcode Run Script Build Phase named **"Bundle Pulsar Lynx code"** runs after compile:
+When you `xcodebuild ... -configuration Release` the LynxExplorer workspace, an Xcode Run Script Build Phase named **"Bundle Pulsar Lynx code"** runs after compile, and Xcode's implicit CodeSign runs after that (so the resulting `.app` is correctly signed for the device).
+
+The bundle itself is fully self-contained — `lynx.config.ts` sets `output.dataUriLimit.image = Number.MAX_SAFE_INTEGER`, so all 151 preset PNGs and the tab-bar icons are inlined as dataURIs. The shipped `main.lynx.bundle` is ~6.7 MB and has no runtime HTTP dependencies, which is what makes `local://homepage.lynx.bundle` resolution work on a device with no dev server.
+
+The Run Script logic:
 
 ```sh
 if [[ "$CONFIGURATION" != *Release* ]]; then exit 0; fi
