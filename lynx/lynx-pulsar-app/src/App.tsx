@@ -53,7 +53,10 @@ function playPattern(patternName: string): boolean {
 }
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<string>("home");
+  // Home tab is hidden in the tab bar below: the "Connect device" pairing flow
+  // depends on WebSocket, which Lynx does not yet expose. Default to "presets"
+  // so the app opens straight onto the working surface.
+  const [activeTab, setActiveTab] = useState<string>("presets");
   const [helpOpen, setHelpOpen] = useState(false);
 
   // ── Connection state ──
@@ -1327,10 +1330,13 @@ export function App() {
 
       {/* Bottom Tab Bar */}
       <view className="tab-bar">
+        {/* Home tab hidden — "Connect device" needs WebSocket, not yet supported in Lynx.
+            Restore by uncommenting and flipping the default activeTab back to "home".
         <view className={`tab ${activeTab === "home" ? "tab-active" : ""}`} bindtap={handleTabHome}>
           <image src={activeTab === "home" ? iconHomeActive : iconHomeInactive} style={{ width: "24px", height: "24px" }} />
           <text className={`tab-label ${activeTab === "home" ? "tab-label-active" : ""}`}>Home</text>
         </view>
+        */}
         <view className={`tab ${activeTab === "presets" ? "tab-active" : ""}`} bindtap={handleTabPresets}>
           <image src={activeTab === "presets" ? iconListActive : iconListInactive} style={{ width: "24px", height: "24px" }} />
           <text className={`tab-label ${activeTab === "presets" ? "tab-label-active" : ""}`}>Presets</text>
