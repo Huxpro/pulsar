@@ -4,8 +4,10 @@ on:
   push:
     branches:
       - main
+      - lynx-port
     paths:
       - 'docs/**'
+      - '.github/workflows/deploy-docs.yml'
   workflow_dispatch:
 
 permissions:

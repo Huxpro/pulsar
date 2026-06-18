@@ -1,0 +1,68 @@
+---
+title: Lynx Pulsar
+description: A Lynx port of Software Mansion's Pulsar — haptics SDK and 151-preset showcase, running on a customized LynxExplorer host.
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { BASE_PATH } from '../../../../config';
+
+**Lynx Pulsar** is a [Lynx](https://lynxjs.org) port of [Software Mansion's Pulsar](https://github.com/software-mansion/pulsar). It brings the polished `PulsarApp` UI — Home, Presets, Playground, Demos — to ReactLynx, talking to the same Pulsar Swift SDK through a Lynx native module.
+
+This documentation covers the **Lynx side** of the fork. For the iOS / Android / React Native APIs (unchanged from upstream), use the SDK pages in the sidebar.
+
+## What is in the port
+
+<CardGrid>
+  <LinkCard
+    title="lynx-pulsar (adapter)"
+    href="https://github.com/Huxpro/pulsar/tree/lynx-port/lynx/lynx-pulsar"
+    description="Objective-C bridge to Pulsar Swift SDK, 151 preset metadata records, usePatternComposer / useRealtimeComposer hooks. Mirrors react-native-pulsar without worklets."
+  />
+  <LinkCard
+    title="lynx-pulsar-app (showcase)"
+    href="https://github.com/Huxpro/pulsar/tree/lynx-port/lynx/lynx-pulsar-app"
+    description="ReactLynx port of upstream PulsarApp. Self-contained .lynx bundle, assets inlined as dataURIs, runs on a customized LynxExplorer host with zero dev-server dependency."
+  />
+  <LinkCard
+    title="lynx-pulsar-demo (harness)"
+    href="https://github.com/Huxpro/pulsar/tree/lynx-port/lynx/lynx-pulsar-demo"
+    description="Minimal SDK test harness. Mirrors react-native/PulsarApp/. Useful for adapter regression tests."
+  />
+</CardGrid>
+
+## What runs on device
+
+The shipped artifact is a customized **`LynxExplorer.app`** (display name "Lynx Pulsar") with the Pulsar Swift SDK linked, `PulsarLynxModule` registered as a `LynxModule`, and a Release-only Xcode build phase that bakes `dist/main.lynx.bundle` into `app.Resource/homepage.lynx.bundle`. From the developer's side it feels like a normal native iOS app: `xcodebuild -configuration Release archive` → installable IPA. The `npm` / Rspeedy plumbing is invisible at build time.
+
+The bundle is fully self-contained — `output.dataUriLimit.image = Number.MAX_SAFE_INTEGER` in `lynx.config.ts` inlines the 151 preset PNGs and the tab-bar icons as dataURIs. Bundle size: ~6.7 MB. No HTTP at runtime.
+
+## What is intentionally different from upstream
+
+- **Home tab is hidden.** The "Connect device" pairing flow needs WebSocket; Lynx does not yet expose one. The Home JSX stays in source as a commented block — restore it by uncommenting and flipping the default `activeTab` back to `"home"`.
+- **No worklets.** Lynx's dual-thread model does not use Reanimated. `usePatternComposer` / `useRealtimeComposer` are plain `useRef`-backed hooks.
+- **No `bindtap` library.** Touch handlers are inline via Lynx primitives (`bindtap`, `bindtouchstart`).
+- **CSS quirks accommodated.** `text-transform` is unsupported; tab panel show/hide uses `position: absolute + zIndex` (per Lynx flex rules in [`AGENTS.md`](https://github.com/Huxpro/pulsar/blob/lynx-port/lynx/lynx-pulsar-app/AGENTS.md)).
+
+## Next steps
+
+<CardGrid>
+  <LinkCard
+    title="Build prompt"
+    href={`${BASE_PATH}/lynx/build-prompt`}
+    description="One-shot AI prompt that goes from clone to installed app on the iOS Simulator or a physical iPhone."
+  />
+  <LinkCard
+    title="Architecture"
+    href={`${BASE_PATH}/lynx/architecture`}
+    description="How the .lynx bundle reaches device CoreHaptics: the JS bundle, the host shell, and the Run Script build phase."
+  />
+  <LinkCard
+    title="Lynx SDK reference"
+    href={`${BASE_PATH}/sdk/lynx`}
+    description="lynx-pulsar API surface: Presets, usePatternComposer, useRealtimeComposer."
+  />
+</CardGrid>
+
+## Provenance
+
+The Lynx port lives at [github.com/Huxpro/pulsar](https://github.com/Huxpro/pulsar) on the `lynx-port` branch. Upstream is [github.com/software-mansion/pulsar](https://github.com/software-mansion/pulsar) — iOS / Android / React Native fixes belong there. SDK design decisions, presets, and visual identity belong to Software Mansion; the port adapts them to Lynx primitives.

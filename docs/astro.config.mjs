@@ -5,7 +5,7 @@ import react from '@astrojs/react';
 import { BASE_PATH } from './config.ts';
 
 export default defineConfig({
-  site: 'https://docs.swmansion.com/',
+  site: 'https://huangxuan.me/',
   base: BASE_PATH,
   vite: {
     css: {
@@ -20,7 +20,7 @@ export default defineConfig({
   },
   integrations: [
     starlight({
-      title: 'Pulsar',
+      title: 'Lynx Pulsar',
       customCss: [
         './src/styles/index.css',
         './src/content/docs/custom.css',
@@ -29,11 +29,19 @@ export default defineConfig({
       ],
       pagination: false,
       social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/software-mansion/pulsar' },
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/Huxpro/pulsar' },
       ],
       sidebar: [
         {
-          label: 'Getting started',
+          label: 'Lynx Pulsar',
+          items: [
+            { label: 'Overview', slug: 'lynx/overview' },
+            { label: 'Build prompt', slug: 'lynx/build-prompt' },
+            { label: 'Architecture', slug: 'lynx/architecture' },
+          ],
+        },
+        {
+          label: 'Getting started (upstream)',
           slug: 'getting-started',
         },
         {
@@ -59,6 +67,7 @@ export default defineConfig({
             { label: 'iOS', slug: 'sdk/ios' },
             { label: 'Android', slug: 'sdk/android' },
             { label: 'React Native', slug: 'sdk/react-native' },
+            { label: 'Lynx', slug: 'sdk/lynx' },
           ],
         },
         // {

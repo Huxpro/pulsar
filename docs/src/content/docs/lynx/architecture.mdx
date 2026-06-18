@@ -1,0 +1,110 @@
+---
+title: Architecture
+description: How the .lynx bundle reaches CoreHaptics on device — JS surface, host shell, native bridge, and the Run Script build phase.
+---
+
+The Lynx port is three layers stacked over the upstream Swift SDK. None of the upstream code is modified.
+
+```text
+┌─────────────────────────────────────────────────────────┐
+│  Lynx Pulsar.app (customized LynxExplorer)              │
+│  ┌──────────────────────────────────────────────────┐   │
+│  │ ReactLynx UI — App.tsx                           │   │
+│  │   Presets / Playground / Demos                   │   │
+│  └────────────┬─────────────────────────────────────┘   │
+│               │ NativeModules.PulsarModule              │
+│               ▼                                          │
+│  ┌──────────────────────────────────────────────────┐   │
+│  │ PulsarLynxModule (Obj-C, <LynxModule>)           │   │
+│  │   Pulsar()                                       │   │
+│  │   pulsar.getPresets().<presetId>()               │   │
+│  └────────────┬─────────────────────────────────────┘   │
+│               │                                          │
+│               ▼                                          │
+│  ┌──────────────────────────────────────────────────┐   │
+│  │ Pulsar Swift SDK (vendored, upstream untouched)  │   │
+│  │   Core Haptics — CHHapticEngine                  │   │
+│  └──────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────┘
+```
+
+## JS surface
+
+[`lynx/lynx-pulsar/src/`](https://github.com/Huxpro/pulsar/tree/lynx-port/lynx/lynx-pulsar/src) mirrors `react-native/react-native-pulsar/src/`:
+
+- **`NativePulsar.ts`** — `NativeModules.PulsarModule` typed surface.
+- **`Presets.ts`** — 151 generated presets. Same metadata as upstream; the `play()` function calls into `NativePulsar` instead of an RN TurboModule.
+- **`usePatternComposer.ts` / `useRealtimeComposer.ts`** — `useRef`-backed hooks. No `'worklet'` directive, no Reanimated dependency.
+- **`Settings.ts`, `types.ts`, `index.tsx`** — public exports.
+
+The package consumes `@lynx-js/react` (peer-dependency-pinned to `0.116.4`) and is consumed by `lynx-pulsar-app` via `"lynx-pulsar": "file:../lynx-pulsar"`.
+
+## Host shell (Lynx Pulsar.app)
+
+The host is a customized [LynxExplorer](https://github.com/lynx-family/lynx-stack/tree/main/explorer) — a worktree maintained at `~/github/lynx-pulsar-explorer/`. The modifications:
+
+- `LynxExplorer/modules/Pulsar/Sources/Pulsar/` — vendored copy of the Pulsar Swift SDK.
+- `LynxExplorer/modules/PulsarLynxModule.{h,m}` — registered in `LynxInitProcessor.m` via `[globalConfig registerModule:PulsarLynxModule.class]`.
+- `Info.plist` — `CFBundleDisplayName = "Lynx Pulsar"`, `CFBundleIdentifier = "com.huxpro.lynx.pulsar"`.
+- `Assets.xcassets/AppIcon.appiconset/` — regenerated from the upstream Pulsar 1024×1024 PNG, all 25 idiom × scale variants.
+- Build settings — `SWIFT_VERSION = 5.0`, `IPHONEOS_DEPLOYMENT_TARGET = 15.0`, signing team `ZBB74974C5`.
+- **Run Script Build Phase "Bundle Pulsar Lynx code"** — Release-only, see below.
+
+## Native bridge
+
+```objc
+@interface PulsarLynxModule : NSObject <LynxModule>
++ (NSString *)name;             // @"PulsarModule"
++ (NSDictionary *)methodLookup; // JS name → ObjC selector
+@end
+```
+
+The bridge owns one `Pulsar` instance. JS calls cross into `pulsar.getPresets().<presetId>()` or pattern / realtime composer methods. Sync returns are supported for primitive-shaped values (validated by `test-sync-returns/`).
+
+## Bundle → device pipeline
+
+The Release-only Xcode build phase glues everything together:
+
+```sh
+# Bundle Pulsar Lynx code — Release configuration only
+if [[ "$CONFIGURATION" != *Release* ]]; then exit 0; fi
+
+LYNX_APP_DIR="${LYNX_PULSAR_APP_DIR:-$HOME/github/pulsar/lynx/lynx-pulsar-app}"
+cd "$LYNX_APP_DIR"
+PATH="/opt/homebrew/bin:/usr/local/bin:$PATH" npm run build  # rspeedy build
+
+RES_DEST="$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Resource"
+mkdir -p "$RES_DEST"
+cp "$LYNX_APP_DIR/dist/main.lynx.bundle" "$RES_DEST/homepage.lynx.bundle"
+```
+
+The phase is declared in `LynxExplorer.xcodeproj/project.pbxproj` with `outputPaths = ["$(BUILT_PRODUCTS_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Resource/homepage.lynx.bundle"]`, so Xcode's implicit CodeSign step that runs after the explicit build phases correctly hashes the new file.
+
+The host's `AppDelegate.mm` loads `file://lynx?local://homepage.lynx.bundle?fullscreen=true`. `DemoTemplateResourceFetcher` resolves that to `[NSBundle mainBundle] pathForResource:@"Resource/homepage" ofType:@"bundle"]` — i.e. the file the build phase just wrote.
+
+## Self-contained assets
+
+`lynx.config.ts`:
+
+```ts
+output: {
+  dataUriLimit: { image: Number.MAX_SAFE_INTEGER },
+},
+```
+
+Inlines all 151 preset PNGs and the tab-bar icons as base64 dataURIs. Bundle grows from ~272 KB to ~6.7 MB but ships with zero runtime HTTP dependencies — required because `local://` loading has no host to resolve image URLs against.
+
+## Debug flow
+
+Debug builds skip the Run Script (`exit 0` on `CONFIGURATION != Release`). The original Lynx Explorer "Bundle URL" home card stays usable. Dev workflow:
+
+```bash
+( cd lynx/lynx-pulsar-app && npm run dev ) &
+# rspeedy prints: ➜  Lynx http://<host>:<port>/main.lynx.bundle
+echo "http://127.0.0.1:<port>/main.lynx.bundle?fullscreen=true" \
+  | xcrun simctl pbcopy booted
+xcrun simctl launch booted com.huxpro.lynx.pulsar
+# In Simulator: tap the URL field → long-press → Paste → tap Go.
+```
+
+Hot reload works the same way it does for any rspeedy app.

@@ -1,0 +1,61 @@
+---
+title: Build prompt
+description: One-shot AI prompt that builds Lynx Pulsar from a fresh clone to a running iOS Simulator or physical iPhone.
+---
+
+This is the same prompt that lives in [`lynx/lynx-pulsar-app/README.md`](https://github.com/Huxpro/pulsar/blob/lynx-port/lynx/lynx-pulsar-app/README.md). Paste it to any agent (Claude Code, Cursor, etc.) sitting at the root of a `huxpro/pulsar` checkout. It assumes the LynxExplorer host worktree already exists at `~/github/lynx-pulsar-explorer/` — first-time setup is covered in [`lynx/AGENTS.md`](https://github.com/Huxpro/pulsar/blob/lynx-port/lynx/AGENTS.md).
+
+> You are building **Lynx Pulsar.app** — a self-contained iOS app whose JS bundle is compiled in at archive time — and installing it on the user's chosen target (booted iOS Simulator by default, physical iPhone if `--device` is passed). Halt on any error, report progress concisely, and do not modify `iOS/`, `Android/`, or `react-native/` (those are upstream sources).
+>
+> 1. Install JS deps:
+>    ```bash
+>    ( cd lynx/lynx-pulsar && npm install --no-audit --no-fund )
+>    ( cd lynx/lynx-pulsar-app && npm install --no-audit --no-fund )
+>    ```
+> 2. Verify the host project exists at `~/github/lynx-pulsar-explorer/explorer/darwin/ios/lynx_explorer/LynxExplorer.xcworkspace`. If missing, follow `lynx/AGENTS.md → LynxExplorer Integration (iOS)` to set it up (one-time, ~30 min for the initial `pod install`).
+> 3. Confirm the build phase is present:
+>    ```bash
+>    grep -q "Bundle Pulsar Lynx code" \
+>      ~/github/lynx-pulsar-explorer/explorer/darwin/ios/lynx_explorer/LynxExplorer.xcodeproj/project.pbxproj
+>    ```
+>    If absent, re-apply it using the Ruby snippet at the bottom of `lynx/lynx-pulsar-app/README.md`.
+> 4. **Simulator path** — Release build for the currently booted simulator:
+>    ```bash
+>    DEVICE_ID=$(xcrun simctl list devices booted -j | python3 -c 'import sys,json; print(json.load(sys.stdin)["devices"].values().__iter__().__next__()[0]["udid"])')
+>    cd ~/github/lynx-pulsar-explorer/explorer/darwin/ios/lynx_explorer
+>    xcodebuild -workspace LynxExplorer.xcworkspace -scheme LynxExplorer \
+>      -configuration Release \
+>      -destination "platform=iOS Simulator,id=$DEVICE_ID" \
+>      -derivedDataPath build clean build
+>    xcrun simctl install booted build/Build/Products/Release-iphonesimulator/LynxExplorer.app
+>    xcrun simctl launch booted com.huxpro.lynx.pulsar
+>    sleep 4
+>    xcrun simctl io booted screenshot /tmp/pulsar-verify.png
+>    sips -Z 900 /tmp/pulsar-verify.png --out /tmp/pulsar-verify-small.png
+>    ```
+>    Read `/tmp/pulsar-verify-small.png` and confirm the Presets tab shows the first preset cards and the three-icon tab bar (Presets / Playground / Demos). The Home tab is intentionally hidden — Lynx does not yet ship WebSocket, which the "Connect device" pairing needs.
+> 5. **Physical device path** — discover the UDID, archive, install:
+>    ```bash
+>    DEVICE_UDID=$(idevice_id -l | head -1)
+>    cd ~/github/lynx-pulsar-explorer/explorer/darwin/ios/lynx_explorer
+>    xcodebuild -workspace LynxExplorer.xcworkspace -scheme LynxExplorer \
+>      -configuration Release \
+>      -destination "generic/platform=iOS" \
+>      -allowProvisioningUpdates \
+>      -derivedDataPath build clean build
+>    cd build/Build/Products/Release-iphoneos
+>    rm -rf Payload && mkdir Payload && cp -R LynxExplorer.app Payload/
+>    zip -rq /tmp/lynx-pulsar.ipa Payload/
+>    ideviceinstaller -u "$DEVICE_UDID" install /tmp/lynx-pulsar.ipa
+>    ```
+>    Ask the user to launch "Lynx Pulsar" from their home screen. First time on a device requires trusting the cert: *Settings → General → VPN & Device Management → Trust "Apple Development: huxpro@gmail.com"*.
+
+## Why it is "one shot"
+
+Three constraints made this possible:
+
+1. **Release-only Xcode build phase.** Run Script "Bundle Pulsar Lynx code" runs `rspeedy build` then `cp dist/main.lynx.bundle → Resource/homepage.lynx.bundle`. Xcode's implicit CodeSign runs after this phase, so the resulting `.app` is properly signed. Skipped in Debug, where the original Lynx-Explorer Bundle-URL card stays for live reload.
+2. **Self-contained bundle.** `dataUriLimit.image = Number.MAX_SAFE_INTEGER` inlines every preset PNG and tab icon. No HTTP at runtime. No `static/` directory to keep alongside the bundle.
+3. **Display name + icons.** `Info.plist` `CFBundleDisplayName = "Lynx Pulsar"`. `AppIcon.appiconset` regenerated from upstream `PulsarApp/ios/PulsarApp/Images.xcassets/AppIcon.appiconset/App-Icon-1024x1024@1x.png` via `sips` (all 25 sizes).
+
+The whole pipeline is documented end-to-end in the source README. This page exists for agents who want the prompt without the surrounding context.

@@ -2,17 +2,56 @@
   <img src="https://github.com/software-mansion/pulsar/blob/main/docs/src/assets/og.png" alt="Pulsar - Rich and ready-to use haptics library" />
 </p>
 
-A haptic feedback SDK for iOS, Android, and React Native. Pulsar provides ready-to-use haptic presets, a pattern composer for custom haptic sequences, and a real-time composer for gesture-driven feedback.
+<h1 align="center">Lynx Pulsar</h1>
 
-## Features
+<p align="center">
+  A <a href="https://lynxjs.org">Lynx</a> port of <a href="https://github.com/software-mansion/pulsar">Software Mansion's Pulsar</a> haptics SDK and showcase app.
+  <br />
+  <a href="https://huangxuan.me/pulsar/lynx">Documentation</a>
+  ·
+  <a href="lynx/lynx-pulsar-app/README.md">Build prompt</a>
+  ·
+  <a href="https://github.com/software-mansion/pulsar">Upstream Pulsar</a>
+</p>
 
-- **Presets** - Library of built-in haptic patterns (hammer, dogBark, buzz, pulse) and system feedback styles (impacts, notifications, selection)
-- **Pattern Composer** - Define custom haptic patterns using discrete events and continuous amplitude/frequency envelopes
-- **Realtime Composer** - Live amplitude and frequency control for gesture-driven haptics
-- **Cross-platform** - Consistent API across iOS (Swift), Android (Kotlin), and React Native (TypeScript)
-- **Worklet-compatible** - All React Native preset functions and hook methods work inside Reanimated worklets
+This fork ports the React Native side of Pulsar — adapter, presets, and the polished `PulsarApp` UI — to **[Lynx](https://lynxjs.org)** (ReactLynx + Rspeedy). The iOS / Android / RN sides of the upstream repo are untouched. Everything new lives under [`lynx/`](lynx/).
+
+## What's new in this fork
+
+- **`lynx/lynx-pulsar/`** — Lynx adapter library. Objective-C bridge (`PulsarLynxModule`) to the vendored Pulsar Swift SDK, 151 hand-crafted preset metadata records, `usePatternComposer` / `useRealtimeComposer` hooks. Mirrors `react-native/react-native-pulsar/` but de-worklet-ed for Lynx's threading model.
+- **`lynx/lynx-pulsar-app/`** — the polished Lynx app (a port of upstream `PulsarApp/`). Home / Presets / Playground / Demos. Self-contained `.lynx` bundle (assets inlined as dataURIs) — runs on a customized LynxExplorer host with no dev server.
+- **`lynx/lynx-pulsar-demo/`** — minimal SDK harness (a port of `react-native/PulsarApp/`).
+- **Build pipeline** — Release-only Xcode build phase auto-runs `rspeedy build` and copies the bundle into the `.app/Resource/`. Same `xcodebuild` archive flow as a native iOS app; `npm` plumbing is hidden.
+
+For the full integration story (one-shot AI build prompt, simulator + device flows, troubleshooting), see [`lynx/lynx-pulsar-app/README.md`](lynx/lynx-pulsar-app/README.md). Architecture and per-tab port notes live in [`lynx/AGENTS.md`](lynx/AGENTS.md) and [`lynx/lynx-pulsar-app/AGENTS.md`](lynx/lynx-pulsar-app/AGENTS.md).
 
 ## Quick start
+
+Run the Lynx Pulsar app on the booted iOS Simulator (everything else is documented under each platform's section below).
+
+```bash
+git clone https://github.com/Huxpro/pulsar.git
+cd pulsar
+( cd lynx/lynx-pulsar && npm install )
+( cd lynx/lynx-pulsar-app && npm install )
+
+cd ~/github/lynx-pulsar-explorer/explorer/darwin/ios/lynx_explorer
+xcodebuild -workspace LynxExplorer.xcworkspace -scheme LynxExplorer \
+  -configuration Release \
+  -destination "platform=iOS Simulator,name=iPhone 17 Pro" \
+  -derivedDataPath build clean build
+
+xcrun simctl install booted build/Build/Products/Release-iphonesimulator/LynxExplorer.app
+xcrun simctl launch booted com.huxpro.lynx.pulsar
+```
+
+The simulator boots straight into the Presets tab. The first build pays for the Lynx C++ pods (~5-15 min); subsequent archives reuse the cache.
+
+> Setting up the LynxExplorer host the first time (~30 min for the initial `pod install` because of PrimJS) is documented in [`lynx/AGENTS.md → LynxExplorer Integration (iOS)`](lynx/AGENTS.md). After that, every change in `lynx/lynx-pulsar-app/` reaches the device via a plain `xcodebuild -configuration Release archive`.
+
+## Upstream platforms (unchanged)
+
+The other surfaces stay exactly as Software Mansion ships them. Reference the upstream docs for these:
 
 ### React Native
 
@@ -21,22 +60,16 @@ npx expo install react-native-pulsar react-native-worklets
 ```
 
 ```ts
-import { Presets, usePatternComposer, useRealtimeComposer } from 'react-native-pulsar';
-
-// Play a preset
+import { Presets } from 'react-native-pulsar';
 Presets.dogBark();
-
-// Play a system haptic
 Presets.System.impactMedium();
 ```
 
-### iOS
+### iOS (Swift Package)
 
 <!-- GENERATED:IOS_VERSION_START -->
 Latest available version: `1.0.0`
 <!-- GENERATED:IOS_VERSION_END -->
-
-Add Pulsar as a Swift Package dependency in Xcode, or add it to your `Package.swift`:
 
 <!-- GENERATED:IOS_INSTALL_SNIPPET_START -->
 ```swift
@@ -46,20 +79,11 @@ dependencies: [
 ```
 <!-- GENERATED:IOS_INSTALL_SNIPPET_END -->
 
-```swift
-import Pulsar
-
-let pulsar = Pulsar()
-pulsar.getPresets().hammer()
-```
-
-### Android
+### Android (Gradle)
 
 <!-- GENERATED:ANDROID_VERSION_START -->
 Latest available version: `1.1.0`
 <!-- GENERATED:ANDROID_VERSION_END -->
-
-Add Pulsar as a Gradle dependency:
 
 <!-- GENERATED:ANDROID_INSTALL_SNIPPET_START -->
 ```kotlin
@@ -69,82 +93,56 @@ dependencies {
 ```
 <!-- GENERATED:ANDROID_INSTALL_SNIPPET_END -->
 
-```kotlin
-import com.swmansion.pulsar.Pulsar
-
-val pulsar = Pulsar(context)
-pulsar.getPresets().hammer()
-```
+Full API references at [docs.swmansion.com/pulsar](https://docs.swmansion.com/pulsar) (upstream).
 
 ## Repository structure
 
 ```
-pulsar/
-├── iOS/
-│   ├── Pulsar/         # iOS Swift SDK (Swift Package, iOS 13+)
-│   └── PulsarApp/      # iOS native demo app
-├── Android/
-│   ├── Pulsar/         # Android Kotlin SDK (Gradle library, API 24+)
-│   └── PulsarApp/      # Android native demo app
-├── react-native/
-│   └── react-native-pulsar/  # React Native Turbo Module
-│   └── PulsarApp/            # React Native native demo app
-├── PulsarApp/          # React Native Expo showcase app
-└── docs/               # Documentation site (Astro/Starlight)
+pulsar/                            # huxpro/pulsar (this fork)
+├── iOS/                           # upstream Swift SDK — untouched
+├── Android/                       # upstream Kotlin SDK — untouched
+├── react-native/                  # upstream RN adapter + harness — untouched
+├── PulsarApp/                     # upstream Expo showcase — the Lynx port's source
+├── lynx/                          # ← everything new
+│   ├── lynx-pulsar/               # Lynx adapter library
+│   ├── lynx-pulsar-app/           # the polished app (port of PulsarApp/)
+│   ├── lynx-pulsar-demo/          # SDK harness (port of react-native/PulsarApp/)
+│   ├── AGENTS.md                  # ReactLynx rules + LynxExplorer host setup
+│   └── lynx-pulsar-app/AGENTS.md  # port-specific design notes
+└── docs/                          # Astro / Starlight docs site (deploys to GitHub Pages)
 ```
 
 ## Packages
 
-| Platform | Package |
-|----------|---------|
-| React Native | [![npm](https://img.shields.io/npm/v/react-native-pulsar)](https://www.npmjs.com/package/react-native-pulsar) |
-| iOS | [Swift Package](https://github.com/software-mansion-labs/pulsar-ios) |
-| Android | [Maven Central](https://central.sonatype.com/artifact/com.swmansion/pulsar) |
+| Platform | Package | Source |
+|----------|---------|--------|
+| **Lynx** | (not yet published) | [`lynx/lynx-pulsar/`](lynx/lynx-pulsar/) |
+| React Native | [![npm](https://img.shields.io/npm/v/react-native-pulsar)](https://www.npmjs.com/package/react-native-pulsar) | upstream |
+| iOS | [Swift Package](https://github.com/software-mansion-labs/pulsar-ios) | upstream |
+| Android | [Maven Central](https://central.sonatype.com/artifact/com.swmansion/pulsar) | upstream |
 
 ## Documentation
 
-Full API reference and guides are available at the [documentation site](https://docs.swmansion.com/pulsar).
-
-- [SDK Overview](https://docs.swmansion.com/pulsar/sdk/overview) - Core concepts: types of haptics, preloading, and caching
-- [iOS SDK](https://docs.swmansion.com/pulsar/sdk/ios) - Swift API reference
-- [Android SDK](https://docs.swmansion.com/pulsar/sdk/android) - Kotlin API reference
-- [React Native SDK](https://docs.swmansion.com/pulsar/sdk/react-native) - TypeScript API reference
-
-<!-- ## AI Skills
-
-Install the `pulsar-haptics` skill from the [software-mansion-labs/skills](https://github.com/software-mansion-labs/skills) repository:
-
-```text
-/plugin marketplace add software-mansion-labs/skills
-/plugin install skills@swmansion
-/reload-plugins
-```
-
-Or with `npx`:
-
-```bash
-npx skills add software-mansion-labs/skills
-``` -->
+- **Lynx Pulsar:** [huangxuan.me/pulsar](https://huangxuan.me/pulsar)
+- **Upstream Pulsar:** [docs.swmansion.com/pulsar](https://docs.swmansion.com/pulsar)
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
+Lynx-side changes land in this fork. iOS / Android / React Native fixes belong upstream — open them at [software-mansion/pulsar](https://github.com/software-mansion/pulsar). General contribution guidelines: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## License
 
-Pulsar library is licensed under [The MIT License](LICENSE).
+Pulsar is licensed under [The MIT License](LICENSE), as is this fork.
 
-## Try the Pulsar App
+## Try the (upstream) Pulsar app
 
-Download the Pulsar companion app to feel haptic presets directly on your device:
+Download the official Pulsar companion app to feel haptic presets:
 
 - [App Store](https://apps.apple.com/pl/app/haptics-presets-pulsar/id6761362104)
 - [Google Play](https://play.google.com/store/apps/details?id=com.swmansion.pulsar.app)
 
-## Community Discord
+A Lynx Pulsar TestFlight is on the roadmap once the LynxExplorer host integration stabilizes.
 
-[Join the Software Mansion Community Discord](https://discord.swmansion.com) to chat about haptics or other Software Mansion libraries.
+## Credits
 
-## Pulsar is created by Software Mansion
-
-Since 2012 [Software Mansion](https://swmansion.com) is a software agency with experience in building web and mobile apps. We are Core React Native Contributors and experts in dealing with all kinds of React Native issues. We can help you build your next dream product – [Hire us](https://swmansion.com/contact/projects?utm_source=reanimated&utm_medium=readme).
+Pulsar is created by [Software Mansion](https://swmansion.com). This Lynx port is an independent fork by [@Huxpro](https://github.com/Huxpro) — all SDK design decisions, presets, and visual identity belong to the original authors.
