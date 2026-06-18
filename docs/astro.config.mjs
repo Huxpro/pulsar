@@ -38,36 +38,37 @@ export default defineConfig({
             { label: 'Overview', slug: 'lynx/overview' },
             { label: 'Build prompt', slug: 'lynx/build-prompt' },
             { label: 'Architecture', slug: 'lynx/architecture' },
+            { label: 'SDK reference', slug: 'sdk/lynx' },
           ],
         },
         {
-          label: 'Getting started (upstream)',
-          slug: 'getting-started',
-        },
-        {
-          label: 'Presets playground',
-          slug: 'presets-playground',
-        },
-        // {
-        //   label: 'AI Skills',
-        //   slug: 'skills',
-        // },
-        {
-          label: 'Pulsar Studio',
-          slug: 'pulsar-studio',
-          badge: {
-            text: 'Soon',
-            variant: 'note',
-          },
-        },
-        {
-          label: 'SDK',
+          label: 'Upstream Pulsar',
           items: [
-            { label: 'Overview', slug: 'sdk/overview' },
-            { label: 'iOS', slug: 'sdk/ios' },
-            { label: 'Android', slug: 'sdk/android' },
-            { label: 'React Native', slug: 'sdk/react-native' },
-            { label: 'Lynx', slug: 'sdk/lynx' },
+            {
+              label: 'Getting started ↗',
+              link: 'https://docs.swmansion.com/pulsar/getting-started',
+              attrs: { target: '_blank', rel: 'noopener' },
+            },
+            {
+              label: 'Presets playground ↗',
+              link: 'https://docs.swmansion.com/pulsar/presets-playground',
+              attrs: { target: '_blank', rel: 'noopener' },
+            },
+            {
+              label: 'iOS SDK ↗',
+              link: 'https://docs.swmansion.com/pulsar/sdk/ios',
+              attrs: { target: '_blank', rel: 'noopener' },
+            },
+            {
+              label: 'Android SDK ↗',
+              link: 'https://docs.swmansion.com/pulsar/sdk/android',
+              attrs: { target: '_blank', rel: 'noopener' },
+            },
+            {
+              label: 'React Native SDK ↗',
+              link: 'https://docs.swmansion.com/pulsar/sdk/react-native',
+              attrs: { target: '_blank', rel: 'noopener' },
+            },
           ],
         },
         // {

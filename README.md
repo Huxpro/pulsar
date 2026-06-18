@@ -51,49 +51,11 @@ The simulator boots straight into the Presets tab. The first build pays for the 
 
 ## Upstream platforms (unchanged)
 
-The other surfaces stay exactly as Software Mansion ships them. Reference the upstream docs for these:
+The other surfaces stay exactly as Software Mansion ships them. For install snippets and full API references, see the upstream sources — this fork intentionally does not restate them.
 
-### React Native
-
-```bash
-npx expo install react-native-pulsar react-native-worklets
-```
-
-```ts
-import { Presets } from 'react-native-pulsar';
-Presets.dogBark();
-Presets.System.impactMedium();
-```
-
-### iOS (Swift Package)
-
-<!-- GENERATED:IOS_VERSION_START -->
-Latest available version: `1.0.0`
-<!-- GENERATED:IOS_VERSION_END -->
-
-<!-- GENERATED:IOS_INSTALL_SNIPPET_START -->
-```swift
-dependencies: [
-  .package(url: "https://github.com/software-mansion-labs/pulsar-ios", from: "1.0.0")
-]
-```
-<!-- GENERATED:IOS_INSTALL_SNIPPET_END -->
-
-### Android (Gradle)
-
-<!-- GENERATED:ANDROID_VERSION_START -->
-Latest available version: `1.1.0`
-<!-- GENERATED:ANDROID_VERSION_END -->
-
-<!-- GENERATED:ANDROID_INSTALL_SNIPPET_START -->
-```kotlin
-dependencies {
-  implementation("com.swmansion:pulsar:1.1.0")
-}
-```
-<!-- GENERATED:ANDROID_INSTALL_SNIPPET_END -->
-
-Full API references at [docs.swmansion.com/pulsar](https://docs.swmansion.com/pulsar) (upstream).
+- **React Native** — [upstream README](https://github.com/software-mansion/pulsar#quick-start) · [`react-native-pulsar` docs](https://docs.swmansion.com/pulsar/sdk/react-native)
+- **iOS Swift Package** — [upstream README](https://github.com/software-mansion/pulsar#ios) · [iOS SDK docs](https://docs.swmansion.com/pulsar/sdk/ios)
+- **Android Gradle** — [upstream README](https://github.com/software-mansion/pulsar#android) · [Android SDK docs](https://docs.swmansion.com/pulsar/sdk/android)
 
 ## Repository structure
 
@@ -134,15 +96,8 @@ Lynx-side changes land in this fork. iOS / Android / React Native fixes belong u
 
 Pulsar is licensed under [The MIT License](LICENSE), as is this fork.
 
-## Try the (upstream) Pulsar app
-
-Download the official Pulsar companion app to feel haptic presets:
-
-- [App Store](https://apps.apple.com/pl/app/haptics-presets-pulsar/id6761362104)
-- [Google Play](https://play.google.com/store/apps/details?id=com.swmansion.pulsar.app)
-
-A Lynx Pulsar TestFlight is on the roadmap once the LynxExplorer host integration stabilizes.
-
 ## Credits
 
-Pulsar is created by [Software Mansion](https://swmansion.com). This Lynx port is an independent fork by [@Huxpro](https://github.com/Huxpro) — all SDK design decisions, presets, and visual identity belong to the original authors.
+Pulsar is created by [Software Mansion](https://swmansion.com); all SDK design decisions, presets, and visual identity belong to the original authors. This Lynx port is an independent fork by [@Huxpro](https://github.com/Huxpro).
+
+The official Pulsar companion app is on the [App Store](https://apps.apple.com/pl/app/haptics-presets-pulsar/id6761362104) and [Google Play](https://play.google.com/store/apps/details?id=com.swmansion.pulsar.app). A Lynx Pulsar TestFlight may follow once host integration stabilizes.
