@@ -1,7 +1,6 @@
 import styles from './TopBanner.module.scss';
 
 import { BASE_PATH } from '../../../../config';
-import swmLogo from '../../../assets/swm-logo.svg';
 import starIcon from '../../../assets/landing-page/star.svg';
 import angelIcon from '../../../assets/landing-page/angel.svg';
 import warningIcon from '../../../assets/landing-page/warning.svg';
@@ -63,31 +62,26 @@ export function TopBanner() {
   return (
     <div className={`${styles.banner} ${colorClass}`}>
       <div className={styles.leftBar}>
-        <div className={styles.authors}>
-          <span>Created by</span>
-          <img src={swmLogo.src} />
-        </div>
-
         <div className={styles.header}>
-          <div className={styles.title}>Rich and ready-to-use haptics library</div>
+          <div className={styles.title}>Rich and ready-to-use haptics for Lynx</div>
           <div className={styles.subtitle}>
-            Presets that you can hear and feel with Live Preview.
+            151 presets you can feel, plus pattern and realtime composers — through a native module.
           </div>
         </div>
 
         <div className={styles.buttonHolder}>
           <Button
-            label="Preset playground"
-            url={`${BASE_PATH}/presets-playground`}
+            label="SDK reference"
+            url={`${BASE_PATH}/sdk/lynx/`}
             className={styles.fullWidth}
-            onClick={() => window.posthog?.capture('preset_playground_cta_clicked')}
+            onClick={() => window.posthog?.capture('sdk_cta_clicked')}
           />
           <Button
-            label="Read the docs"
+            label="Get started"
             variant="filled"
-            url={`${BASE_PATH}/getting-started`}
+            url={`${BASE_PATH}/lynx/overview/`}
             className={styles.fullWidth}
-            onClick={() => window.posthog?.capture('docs_cta_clicked')}
+            onClick={() => window.posthog?.capture('get_started_cta_clicked')}
           />
         </div>
       </div>

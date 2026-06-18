@@ -51,9 +51,9 @@ export function Preset(preset: PresetConfig) {
       {isToastVisible && createPortal(
         <div className={`${style.toast} ${isExiting ? style.toastExit : style.toastEnter}`} role="status">
           <span>
-            To play haptics on your phone, visit the{' '}
-            <a href={`${BASE_PATH}/presets-playground`}>Presets Playground</a>
-            {' '}where you can connect your device.
+            To feel these on your phone, install the{' '}
+            <a href={`${BASE_PATH}/lynx/build-prompt/`}>Lynx Pulsar demo</a>
+            {' '}— it ships all 151 presets.
           </span>
           <button
             className={style.toastClose}

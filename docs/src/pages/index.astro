@@ -1,8 +1,9 @@
 ---
 import { BasicLayout } from '../components/landing/Layouts/BasicLayout';
 import { TopBar } from '../components/landing/TopBar/TopBar';
+import { TopBanner } from '../components/landing/TopBanner/TopBanner';
 import { SectionHeader } from '../components/landing/SectionHeader/SectionHeader';
-import { Button } from '../components/landing/Button/Button';
+import { PresetsList } from '../components/landing/PresetsList/PresetsList';
 import GTMBody from '../components/gtm-body.astro';
 import GTMHead from '../components/gtm-head.astro';
 import PostHog from '../components/posthog.astro';
@@ -48,29 +49,19 @@ import { BASE_PATH } from '../../config';
       </BasicLayout>
     </div>
 
+    <TopBanner client:load />
+
     <BasicLayout className={[commonStyle.centerColumn, commonStyle.spaceTopLarge].join(' ')}>
       <SectionHeader
-        title="Haptics for Lynx apps"
-        subtitle="151 hand-crafted presets, a pattern composer for custom haptic sequences, and a realtime composer for gesture-driven feedback. All driven by Core Haptics through a Lynx native module."
+        title="Get to know Pulsar presets"
+        subtitle="Don't spend time creating your own patterns. Use these and bring haptics into your Lynx app with one line."
       />
-
-      <div class="ctaRow">
-        <Button
-          label="Get started"
-          url={`${BASE_PATH}/lynx/overview/`}
-          variant="filled"
-        />
-        <Button
-          label="SDK reference"
-          url={`${BASE_PATH}/sdk/lynx/`}
-          variant="unfilled"
-        />
-      </div>
+      <PresetsList client:load />
     </BasicLayout>
 
     <footer class="siteFooter">
       <p>
-        An independent Lynx port of <a href="https://github.com/software-mansion/pulsar" target="_blank" rel="noopener">Pulsar by Software Mansion</a>. Not affiliated.
+        An independent Lynx port of <a href="https://github.com/software-mansion/pulsar" target="_blank" rel="noopener">Pulsar by Software Mansion</a>. Not affiliated. Presets, designs and SDK by the original authors.
       </p>
       <p>
         <a href="https://github.com/Huxpro/pulsar" target="_blank" rel="noopener">github.com/Huxpro/pulsar</a>
@@ -78,13 +69,6 @@ import { BASE_PATH } from '../../config';
     </footer>
 
     <style>
-      .ctaRow {
-        display: flex;
-        gap: 16px;
-        flex-wrap: wrap;
-        justify-content: center;
-        margin-top: 32px;
-      }
       .siteFooter {
         margin: 96px auto 48px;
         max-width: 720px;
@@ -97,7 +81,6 @@ import { BASE_PATH } from '../../config';
       .siteFooter p { margin: 4px 0; }
       .siteFooter a { color: inherit; text-decoration: underline; }
       @media (max-width: 480px) {
-        .ctaRow { flex-direction: column; align-items: stretch; }
         .siteFooter { margin: 64px 16px 32px; }
       }
     </style>
