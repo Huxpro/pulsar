@@ -1,21 +1,14 @@
 ---
-title: Lynx SDK
-description: lynx-pulsar adapter API — Presets, usePatternComposer, useRealtimeComposer for ReactLynx apps.
+title: SDK reference
+description: Presets, usePatternComposer, useRealtimeComposer — the lynx-pulsar API.
 ---
 
 import { CardGrid, LinkCard } from '@astrojs/starlight/components';
 import { BASE_PATH } from '../../../../config';
 
-`lynx-pulsar` is the Lynx adapter for the Pulsar haptics SDK. It mirrors [`react-native-pulsar`](https://www.npmjs.com/package/react-native-pulsar) with two adjustments for the Lynx runtime:
-
-- **No worklets.** Lynx's main/background thread model is different from Reanimated's UI/JS split, so hooks are plain `useRef`-backed and the `'worklet'` directive is removed.
-- **No `bindtap` wrapper.** Touch handlers are inline via Lynx primitives.
-
-Everything else — the 151 presets, the API shape, the `LynxModule` ↔ Pulsar Swift SDK bridge — matches upstream behaviorally.
+`lynx-pulsar` is a Lynx native module wrapping Pulsar's haptics SDK. It ships **151 presets**, a **pattern composer**, and a **realtime composer** for gesture-driven feedback.
 
 ## Install
-
-The package is consumed via a workspace path-link, not (yet) published:
 
 ```json
 {
@@ -25,7 +18,7 @@ The package is consumed via a workspace path-link, not (yet) published:
 }
 ```
 
-The native side is delivered by the host app — see [Architecture](/pulsar/lynx/architecture).
+The package is consumed via workspace path-link from this repo. The native side ships with the [Lynx Pulsar host](/pulsar/lynx/architecture/) — for now, build that host (or a fork of it) to use the SDK in your own Lynx app.
 
 ## Quick examples
 
@@ -87,45 +80,35 @@ const composer = useRealtimeComposer();
 
 `update()` is safe to call at touch-event rate (~60 Hz on iOS); the bridge debounces if backed up.
 
-## API surface
+## API summary
 
-The source of truth is [`lynx/lynx-pulsar/src/`](https://github.com/Huxpro/pulsar/tree/lynx-port/lynx/lynx-pulsar/src). A short summary:
+The source of truth is [`lynx/lynx-pulsar/src/`](https://github.com/Huxpro/pulsar/tree/lynx-port/lynx/lynx-pulsar/src):
 
 | Export | Description |
 |---|---|
 | `Presets` | 151 preset functions plus `Presets.System.*` (impacts, notifications, selection). Each returns `Promise<void>`. |
 | `usePatternComposer()` | Pattern composer hook. Returns `{ discrete, continuous, play, stop, reset }`. |
 | `useRealtimeComposer()` | Realtime composer hook. Returns `{ start, update, stop }`. |
-| `Settings` | `Settings.hapticsSupport()` — same as upstream's "Haptics support: Hardware / Software / None". |
+| `Settings` | `Settings.hapticsSupport()` — reports `Hardware` / `Software` / `None`. |
 | `NativePulsar` | Raw `NativeModules.PulsarModule` typed surface. Escape hatch — usually you don't need it. |
-
-## Differences from upstream React Native
-
-| Upstream (`react-native-pulsar`) | Lynx (`lynx-pulsar`) |
-|---|---|
-| `Pressable onPress={...}` | `<view bindtap={...}>` |
-| `'worklet'` directive in composers | Plain function bodies |
-| Reanimated `useSharedValue` for hot state | `useRef` |
-| TurboModule codegen | Hand-written `<LynxModule>` Obj-C |
-| `Image source={require(...)}` | `<image src={...} />`, assets inlined as dataURIs |
 
 ## Where to go next
 
 <CardGrid>
   <LinkCard
-    title="Architecture"
-    href={`${BASE_PATH}/lynx/architecture`}
-    description="How the .lynx bundle reaches CoreHaptics on device. The host shell, the build phase, the dataURI inlining."
+    title="Run the demo"
+    href={`${BASE_PATH}/lynx/build-prompt/`}
+    description="Install the 151-preset showcase on your iPhone in under 10 minutes."
   />
   <LinkCard
-    title="Build prompt"
-    href={`${BASE_PATH}/lynx/build-prompt`}
-    description="One-shot AI prompt to go from clone to running app on iOS Simulator or physical iPhone."
+    title="How it works"
+    href={`${BASE_PATH}/lynx/architecture/`}
+    description="From JSX tap to Core Haptics — the native module, the host shell, the bundle pipeline."
   />
   <LinkCard
     title="React Native SDK ↗"
     href="https://docs.swmansion.com/pulsar/sdk/react-native"
     target="_blank"
-    description="Upstream RN API at docs.swmansion.com/pulsar — the spec lynx-pulsar mirrors."
+    description="The upstream React Native API at docs.swmansion.com/pulsar — the same SDK on a different runtime."
   />
 </CardGrid>

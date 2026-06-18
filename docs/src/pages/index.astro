@@ -18,22 +18,22 @@ import { BASE_PATH } from '../../config';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Lynx Pulsar — a Lynx port of Software Mansion's Pulsar haptics library. This site documents the Lynx port; everything else lives at the official Pulsar docs."
+      content="Rich, ready-to-use haptic feedback for Lynx apps. 151 hand-crafted presets, pattern composer, and realtime composer — through a Lynx native module."
     />
-    <title>Lynx Pulsar — a Lynx port of Pulsar</title>
+    <title>Lynx Pulsar — haptics for Lynx apps</title>
     <link rel="icon" type="image/svg+xml" href={`${BASE_PATH}/logo.svg`} />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Lynx Pulsar — a Lynx port of Pulsar" />
+    <meta property="og:title" content="Lynx Pulsar — haptics for Lynx apps" />
     <meta
       property="og:description"
-      content="A Lynx port of Software Mansion's Pulsar haptics library. Companion docs for the Lynx adapter, build pipeline, and architecture — upstream platforms are unchanged."
+      content="Rich, ready-to-use haptic feedback for Lynx apps. 151 presets, pattern composer, realtime composer."
     />
     <meta property="og:image" content="https://docs.swmansion.com/pulsar/og.png" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Lynx Pulsar — a Lynx port of Pulsar" />
+    <meta name="twitter:title" content="Lynx Pulsar — haptics for Lynx apps" />
     <meta
       name="twitter:description"
-      content="A Lynx port of Software Mansion's Pulsar haptics library. Companion docs for the Lynx adapter, build pipeline, and architecture."
+      content="Rich, ready-to-use haptic feedback for Lynx apps. 151 presets, pattern composer, realtime composer."
     />
     <meta name="twitter:image" content="https://docs.swmansion.com/pulsar/og.png" />
     <GTMHead />
@@ -50,42 +50,30 @@ import { BASE_PATH } from '../../config';
 
     <BasicLayout className={[commonStyle.centerColumn, commonStyle.spaceTopLarge].join(' ')}>
       <SectionHeader
-        title="Lynx Pulsar"
-        subtitle="A Lynx port of Software Mansion's Pulsar haptics library. This site documents the port; the canonical SDK docs for iOS, Android, and React Native live at docs.swmansion.com/pulsar."
+        title="Haptics for Lynx apps"
+        subtitle="151 hand-crafted presets, a pattern composer for custom haptic sequences, and a realtime composer for gesture-driven feedback. All driven by Core Haptics through a Lynx native module."
       />
 
       <div class="ctaRow">
         <Button
-          label="Read the Lynx port docs"
+          label="Get started"
           url={`${BASE_PATH}/lynx/overview/`}
           variant="filled"
         />
         <Button
-          label="Upstream Pulsar docs ↗"
-          url="https://docs.swmansion.com/pulsar"
+          label="SDK reference"
+          url={`${BASE_PATH}/sdk/lynx/`}
           variant="unfilled"
         />
-      </div>
-
-      <div class="extensionNote">
-        <p>
-          <strong>This is an extension, not a replacement.</strong>
-          Lynx Pulsar reuses the upstream Pulsar Swift SDK, the 151-preset metadata,
-          and the visual identity of <code>PulsarApp/</code>. What's new on this site
-          is the ReactLynx adapter, the customized <code>LynxExplorer</code> host,
-          and the build pipeline that ships a self-contained <code>.lynx</code> bundle.
-          For iOS / Android / React Native APIs, follow the upstream link above.
-        </p>
       </div>
     </BasicLayout>
 
     <footer class="siteFooter">
       <p>
-        An independent Lynx port of <a href="https://github.com/software-mansion/pulsar" target="_blank" rel="noopener">Software Mansion's Pulsar</a>.
-        Not affiliated with Software Mansion. SDK design, presets, and visual identity belong to the original authors.
+        An independent Lynx port of <a href="https://github.com/software-mansion/pulsar" target="_blank" rel="noopener">Pulsar by Software Mansion</a>. Not affiliated.
       </p>
       <p>
-        Source: <a href="https://github.com/Huxpro/pulsar" target="_blank" rel="noopener">github.com/Huxpro/pulsar</a>
+        <a href="https://github.com/Huxpro/pulsar" target="_blank" rel="noopener">github.com/Huxpro/pulsar</a>
       </p>
     </footer>
 
@@ -95,26 +83,7 @@ import { BASE_PATH } from '../../config';
         gap: 16px;
         flex-wrap: wrap;
         justify-content: center;
-        margin-top: 24px;
-      }
-      .extensionNote {
-        max-width: 720px;
-        margin: 64px auto 0;
-        padding: 24px 28px;
-        border: 1px solid var(--color-blue-50, rgba(56, 172, 221, 0.4));
-        border-radius: 16px;
-        background-color: rgba(225, 243, 250, 0.4);
-        line-height: 1.6;
-      }
-      .extensionNote p {
-        margin: 0;
-        color: var(--color-blue-900, #001a72);
-      }
-      .extensionNote code {
-        background-color: rgba(0, 26, 114, 0.06);
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-size: 0.92em;
+        margin-top: 32px;
       }
       .siteFooter {
         margin: 96px auto 48px;
@@ -129,7 +98,6 @@ import { BASE_PATH } from '../../config';
       .siteFooter a { color: inherit; text-decoration: underline; }
       @media (max-width: 480px) {
         .ctaRow { flex-direction: column; align-items: stretch; }
-        .extensionNote { margin: 48px 16px 0; }
         .siteFooter { margin: 64px 16px 32px; }
       }
     </style>

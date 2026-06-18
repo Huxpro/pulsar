@@ -35,10 +35,10 @@ export default defineConfig({
         {
           label: 'Lynx Pulsar',
           items: [
-            { label: 'Overview', slug: 'lynx/overview' },
-            { label: 'Build prompt', slug: 'lynx/build-prompt' },
-            { label: 'Architecture', slug: 'lynx/architecture' },
+            { label: 'Get started', slug: 'lynx/overview' },
             { label: 'SDK reference', slug: 'sdk/lynx' },
+            { label: 'Run the demo', slug: 'lynx/build-prompt' },
+            { label: 'How it works', slug: 'lynx/architecture' },
           ],
         },
         {

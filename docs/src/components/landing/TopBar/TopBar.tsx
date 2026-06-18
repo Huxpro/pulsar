@@ -23,14 +23,16 @@ export function TopBar() {
       <div className={styles.container}>
         <div className={styles.logoHolder}>
           <img src={logo.src} alt="Logo" />
-          <span>Pulsar</span>
+          <span>Lynx Pulsar</span>
         </div>
         <div className={styles.menuItems}>
-          <a href={`${BASE_PATH}/presets-playground`}>Presets</a>
-          <a href={`${BASE_PATH}/getting-started`}>Getting started</a>
-          <a href={`${BASE_PATH}/sdk/overview`}>Docs</a>
+          <a href={`${BASE_PATH}/lynx/overview/`}>Get started</a>
+          <a href={`${BASE_PATH}/sdk/lynx/`}>SDK</a>
+          <a href="https://docs.swmansion.com/pulsar" target="_blank" rel="noopener">
+            Upstream ↗
+          </a>
         </div>
-        <a href="https://github.com/software-mansion/pulsar" target="_blank">
+        <a href="https://github.com/Huxpro/pulsar" target="_blank" rel="noopener">
           <img className={styles.gitLogo} src={logoGitHub.src} alt="GitHub" />
         </a>
         <button className={styles.hamburger} onClick={toggleMenu} aria-label="Toggle menu">
@@ -45,7 +47,7 @@ export function TopBar() {
             <div className={styles.mobileMenuHeader}>
               <div className={styles.logoHolder}>
                 <img src={logo.src} alt="Logo" />
-                <span>Pulsar</span>
+                <span>Lynx Pulsar</span>
               </div>
               <img
                 src={closeIcon.src}
@@ -55,18 +57,18 @@ export function TopBar() {
               />
             </div>
             <nav className={styles.mobileMenuItems}>
-              <a href={`${BASE_PATH}/presets-playground`} onClick={closeMenu}>
-                Presets
+              <a href={`${BASE_PATH}/lynx/overview/`} onClick={closeMenu}>
+                Get started
               </a>
-              <a href={`${BASE_PATH}/getting-started`} onClick={closeMenu}>
-                Getting started
+              <a href={`${BASE_PATH}/sdk/lynx/`} onClick={closeMenu}>
+                SDK
               </a>
-              <a href={`${BASE_PATH}/sdk/overview`} onClick={closeMenu}>
-                Docs
+              <a href="https://docs.swmansion.com/pulsar" target="_blank" rel="noopener" onClick={closeMenu}>
+                Upstream ↗
               </a>
             </nav>
             <div className={styles.mobileMenuFooter}>
-              <a href="https://github.com/software-mansion/pulsar" target="_blank">
+              <a href="https://github.com/Huxpro/pulsar" target="_blank" rel="noopener">
                 <img className={styles.gitLogo} src={logoGitHub.src} alt="GitHub" />
               </a>
             </div>
