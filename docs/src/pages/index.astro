@@ -3,7 +3,6 @@ import { BasicLayout } from '../components/landing/Layouts/BasicLayout';
 import { TopBar } from '../components/landing/TopBar/TopBar';
 import { SectionHeader } from '../components/landing/SectionHeader/SectionHeader';
 import { Button } from '../components/landing/Button/Button';
-import { SwmSection } from '../components/landing/SwmSection/SwmSection';
 import GTMBody from '../components/gtm-body.astro';
 import GTMHead from '../components/gtm-head.astro';
 import PostHog from '../components/posthog.astro';
@@ -80,7 +79,15 @@ import { BASE_PATH } from '../../config';
       </div>
     </BasicLayout>
 
-    <SwmSection className={commonStyle.spaceTopLarge} />
+    <footer class="siteFooter">
+      <p>
+        An independent Lynx port of <a href="https://github.com/software-mansion/pulsar" target="_blank" rel="noopener">Software Mansion's Pulsar</a>.
+        Not affiliated with Software Mansion. SDK design, presets, and visual identity belong to the original authors.
+      </p>
+      <p>
+        Source: <a href="https://github.com/Huxpro/pulsar" target="_blank" rel="noopener">github.com/Huxpro/pulsar</a>
+      </p>
+    </footer>
 
     <style>
       .ctaRow {
@@ -109,9 +116,21 @@ import { BASE_PATH } from '../../config';
         border-radius: 4px;
         font-size: 0.92em;
       }
+      .siteFooter {
+        margin: 96px auto 48px;
+        max-width: 720px;
+        padding: 0 16px;
+        text-align: center;
+        font-size: 0.85em;
+        line-height: 1.6;
+        color: var(--color-blue-700, #38496b);
+      }
+      .siteFooter p { margin: 4px 0; }
+      .siteFooter a { color: inherit; text-decoration: underline; }
       @media (max-width: 480px) {
         .ctaRow { flex-direction: column; align-items: stretch; }
         .extensionNote { margin: 48px 16px 0; }
+        .siteFooter { margin: 64px 16px 32px; }
       }
     </style>
   </body>
