@@ -1,0 +1,1260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pulsar → Lynx · Slopfork Recipe</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* === Pulsar palette === */
+:root {
+  --navy:    #001A72;
+  --bg:      #e1f3fa;
+  --border:  #38ACDD;
+  --sub:     #2B85AB;
+  --tab-off: #B5E1F1;
+  --error:   #FF6259;
+  --ok:      #57B495;
+  --white:   #ffffff;
+  --shadow:  -3px 3px 0 #38ACDD;
+  --serif:   "DM Serif Display", "Times New Roman", serif;
+  --sans:    "DM Sans", -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  --mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--navy); font-family: var(--sans); }
+
+html {
+  scroll-behavior: smooth;
+  /* proximity (not mandatory) so taller slides don't get clipped */
+  scroll-snap-type: y proximity;
+}
+
+.slide {
+  min-height: 100vh;
+  padding: 64px 8vw 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  scroll-snap-align: start;
+  position: relative;
+  overflow: visible;
+}
+
+.slide::before {
+  content: attr(data-num);
+  position: absolute;
+  top: 28px; right: 36px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--sub);
+  letter-spacing: 0.12em;
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--sub);
+  margin: 0 0 24px;
+}
+
+h1.hero {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(48px, 7vw, 110px);
+  line-height: 0.95;
+  margin: 0 0 24px;
+  letter-spacing: -0.02em;
+}
+h1.hero em { font-style: italic; color: var(--border); }
+h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(36px, 5vw, 72px);
+  line-height: 1.0;
+  margin: 0 0 24px;
+  letter-spacing: -0.015em;
+}
+h3 {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 22px;
+  margin: 0 0 12px;
+}
+p, li { font-size: 18px; line-height: 1.55; color: var(--navy); }
+p.lede { font-size: clamp(20px, 2.2vw, 28px); line-height: 1.4; max-width: 880px; color: var(--sub); }
+p.byline { font-family: var(--mono); font-size: 13px; color: var(--sub); letter-spacing: 0.05em; }
+
+/* === Nav dots === */
+nav.dots {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 100;
+}
+nav.dots a {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--tab-off);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  transition: transform 0.18s, background 0.18s;
+}
+nav.dots a:hover { transform: scale(1.6); background: var(--navy); }
+
+/* === Card / button === */
+.card {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  padding: 24px 28px;
+  box-shadow: var(--shadow);
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--navy);
+}
+.pill .dot {
+  display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--error);
+}
+.tag {
+  display: inline-block;
+  background: var(--tab-off);
+  color: var(--navy);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  margin: 2px 4px 2px 0;
+}
+
+/* === Hero slide === */
+.slide.hero {
+  background: linear-gradient(160deg, var(--bg) 0%, #c8e8f4 100%);
+}
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 56px;
+  align-items: center;
+}
+.phones {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  align-items: end;
+}
+.phone {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 6px;
+  box-shadow: -6px 6px 0 var(--border), 0 18px 40px rgba(0,26,114,0.18);
+  overflow: hidden;
+  transform: rotate(-1.2deg);
+  transition: transform 0.35s;
+}
+.phone:nth-child(2n) { transform: rotate(1.4deg); }
+.phone:hover { transform: rotate(0) scale(1.04); }
+.phone img { width: 100%; display: block; border-radius: 16px; }
+
+/* === Side-by-side / split === */
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+.split.tight { gap: 24px; }
+.split.thirds { grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+
+.metric {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  padding: 28px;
+  box-shadow: var(--shadow);
+}
+.metric .num {
+  font-family: var(--serif);
+  font-size: clamp(56px, 8vw, 110px);
+  line-height: 1;
+  color: var(--navy);
+  display: block;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+.metric .num.accent { color: var(--border); }
+.metric .num.warn { color: var(--error); }
+.metric .label {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sub);
+}
+.metric .note { display: block; margin-top: 12px; color: var(--navy); font-size: 16px; line-height: 1.45; }
+
+/* === Code === */
+pre.code, code.inline {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+pre.code {
+  background: #07173c;
+  color: #d3e1ff;
+  border-radius: 10px;
+  padding: 22px 24px;
+  overflow: auto;
+  border: 1px solid #38ACDD;
+  box-shadow: 0 14px 30px rgba(0,26,114,0.18);
+  margin: 0;
+}
+pre.code .k  { color: #ffc06b; }       /* keyword */
+pre.code .s  { color: #79e3a9; }       /* string */
+pre.code .c  { color: #6b87b6; font-style: italic; } /* comment */
+pre.code .n  { color: #b5e1f1; }       /* number */
+pre.code .t  { color: #ffabaf; }       /* type */
+pre.code .id { color: #fff; font-weight: 600; }
+pre.code .del { background: rgba(255,98,89,0.18); display: block; }
+pre.code .add { background: rgba(87,180,149,0.18); display: block; }
+pre.code .hi  { background: rgba(255,192,107,0.20); display: block; }
+code.inline {
+  background: rgba(0,26,114,0.07);
+  border: 1px solid rgba(0,26,114,0.15);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.9em;
+  color: var(--navy);
+}
+.code-title {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--sub);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.code-title .badge {
+  background: var(--tab-off);
+  color: var(--navy);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 600;
+}
+.code-title .badge.rn { background: #61dafb33; color: #036b9b; }
+.code-title .badge.lynx { background: var(--navy); color: var(--white); }
+
+/* === Tab strip === */
+.tabstrip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 24px;
+}
+.tabstrip figure { margin: 0; text-align: center; }
+.tabstrip figure img {
+  width: 100%;
+  border-radius: 16px;
+  border: 2px solid var(--border);
+  box-shadow: -5px 5px 0 var(--border);
+  display: block;
+}
+.tabstrip figcaption {
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--sub);
+  letter-spacing: 0.05em;
+}
+
+/* === Pipeline / arch === */
+.pipeline {
+  display: grid;
+  gap: 14px;
+  margin: 28px 0;
+}
+.pipe-row {
+  display: grid;
+  grid-template-columns: 220px 1fr 220px;
+  gap: 20px;
+  align-items: center;
+}
+.pipe-box {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 18px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 15px;
+  box-shadow: var(--shadow);
+}
+.pipe-box.muted { background: rgba(184,225,241,0.6); }
+.pipe-box.shared { background: linear-gradient(135deg, #fff 0%, #d3edf7 100%); border-color: var(--ok); }
+.pipe-box .sub { display: block; font-weight: 400; color: var(--sub); font-size: 12px; font-family: var(--mono); margin-top: 4px; }
+.pipe-mid {
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--sub);
+  position: relative;
+}
+.pipe-mid::before, .pipe-mid::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 38%;
+  height: 2px;
+  background: var(--border);
+}
+.pipe-mid::before { left: 2%; }
+.pipe-mid::after { right: 2%; }
+
+/* === Diff list (the differences slide) === */
+.diff-list { display: grid; gap: 14px; }
+.diff-item {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 20px;
+  background: var(--white);
+  border-left: 4px solid var(--border);
+  padding: 16px 20px;
+  border-radius: 4px;
+  box-shadow: -3px 3px 0 rgba(56,172,221,0.5);
+}
+.diff-item .heading {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--navy);
+}
+.diff-item .body { color: var(--sub); font-size: 15px; line-height: 1.5; }
+.diff-item .body code { font-family: var(--mono); font-size: 13px; color: var(--navy); background: var(--tab-off); padding: 1px 6px; border-radius: 3px; }
+.diff-item.warn { border-left-color: var(--error); }
+.diff-item.good { border-left-color: var(--ok); }
+
+/* === Pillars (harness slide) === */
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 28px;
+}
+.pillar {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+.pillar .num {
+  font-family: var(--serif);
+  font-size: 36px;
+  line-height: 1;
+  color: var(--border);
+}
+.pillar h4 { font-family: var(--sans); font-size: 17px; font-weight: 700; margin: 6px 0 8px; }
+.pillar p { font-size: 14.5px; color: var(--sub); margin: 0; line-height: 1.5; }
+
+/* === Big quote === */
+.bigquote {
+  font-family: var(--serif);
+  font-size: clamp(28px, 4vw, 56px);
+  font-style: italic;
+  line-height: 1.15;
+  color: var(--navy);
+  border-left: 8px solid var(--error);
+  padding: 12px 28px;
+  margin: 24px 0 12px;
+}
+.bigquote cite {
+  display: block;
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--sub);
+  margin-top: 16px;
+}
+
+/* === footer credit slide === */
+.slide.end {
+  background: var(--navy);
+  color: var(--bg);
+}
+.slide.end h1, .slide.end h2 { color: var(--bg); }
+.slide.end .eyebrow, .slide.end p.lede, .slide.end p, .slide.end p.byline { color: var(--tab-off); }
+.slide.end .pill { background: transparent; border-color: var(--tab-off); color: var(--bg); }
+
+/* === floating tab bar in hero === */
+.phone-tabbar {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 56px;
+  background: rgba(255,255,255,0.9);
+  border-top: 1px solid var(--tab-off);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  font-size: 11px;
+  color: var(--sub);
+}
+
+/* === Paired architecture diagram === */
+.arch {
+  display: grid;
+  grid-template-columns: 1fr 70px 1fr;
+  gap: 22px;
+  align-items: stretch;
+}
+.arch-col { display: flex; flex-direction: column; gap: 14px; }
+.arch-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(24px, 2.6vw, 32px);
+  letter-spacing: -0.01em;
+  text-align: center;
+  margin: 0 0 4px;
+}
+.arch-title--rn   { color: var(--error); }
+.arch-title--lynx { color: var(--border); }
+.arch-row {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  padding: 16px 18px;
+  display: grid;
+  gap: 4px;
+}
+.arch-row--accent {
+  background: linear-gradient(135deg, var(--white) 0%, rgba(56,172,221,0.08) 100%);
+}
+.arch-lbl {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sub);
+}
+.arch-val {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--navy);
+}
+.arch-sub {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--sub);
+  line-height: 1.5;
+}
+.arch-em {
+  font-style: italic;
+  color: var(--error);
+  font-weight: 500;
+}
+.arch-row--accent .arch-em { color: var(--ok); }
+.arch-mid {
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif); font-size: 32px;
+  color: var(--border);
+  line-height: 1.2;
+  text-align: center;
+}
+.arch-shared {
+  margin-top: 24px;
+  background: linear-gradient(135deg, var(--white) 0%, #d3edf7 100%);
+  border: 2px solid var(--navy);
+  border-radius: 6px;
+  box-shadow: -3px 3px 0 var(--navy);
+  padding: 18px 22px;
+  display: grid;
+  gap: 4px;
+}
+.arch-shared .arch-lbl { color: var(--navy); }
+.arch-shared .arch-val { font-size: 17px; }
+.arch-shared code { background: rgba(0,26,114,0.08); padding: 1px 8px; border-radius: 3px; }
+
+/* === Code-reuse bar (slide 6) === */
+.reuse-bar {
+  display: flex;
+  height: 60px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow);
+  margin: 24px 0 8px;
+}
+.reuse-bar > div {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--white);
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 13px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+  text-align: center;
+  padding: 0 12px;
+}
+.reuse-bar .reused  { background: linear-gradient(135deg, var(--ok), #3f8e72); flex: 7; }
+.reuse-bar .adapted { background: linear-gradient(135deg, var(--border), #2487bd); flex: 2; }
+.reuse-bar .net-new { background: linear-gradient(135deg, var(--navy), #00134d); flex: 1; }
+
+/* === Compact metric grid (slide 6 — 6 cards) === */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+.metric-compact {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  padding: 22px 20px;
+}
+.metric-compact .num {
+  font-family: var(--serif);
+  font-size: clamp(36px, 4.2vw, 56px);
+  line-height: 1;
+  color: var(--navy);
+  letter-spacing: -0.02em;
+  display: block;
+}
+.metric-compact .num.accent { color: var(--border); }
+.metric-compact .num.warn   { color: var(--error); }
+.metric-compact .num.ok     { color: var(--ok); }
+.metric-compact .label {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sub);
+  margin-top: 8px;
+  display: block;
+}
+.metric-compact .note {
+  display: block;
+  margin-top: 8px;
+  color: var(--navy);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+/* === Mini-diff stack (slide 7 — multiple compares) === */
+.mini-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 14px;
+}
+.mini-compare pre.code { font-size: 12.5px; padding: 16px 18px; }
+.mini-compare-label {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--navy);
+  margin: 22px 0 4px;
+  display: flex; align-items: center; gap: 10px;
+}
+.mini-compare-label .num {
+  background: var(--border);
+  color: var(--white);
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+}
+
+/* === Responsive === */
+@media (max-width: 960px) {
+  .arch { grid-template-columns: 1fr; }
+  .arch-mid { transform: rotate(90deg); height: 40px; }
+  .metric-grid { grid-template-columns: 1fr 1fr; }
+  .mini-compare { grid-template-columns: 1fr; }
+  .hero-grid, .split { grid-template-columns: 1fr; }
+  .split.thirds { grid-template-columns: 1fr; }
+  .pipe-row { grid-template-columns: 1fr; }
+  .diff-item { grid-template-columns: 1fr; }
+  .pillars { grid-template-columns: 1fr; }
+  .tabstrip { grid-template-columns: repeat(2, 1fr); }
+  nav.dots { display: none; }
+  .slide { padding: 56px 6vw 64px; }
+}
+
+/* === reveal-on-scroll (only when JS is enabled; default visible for capture) === */
+html.js .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.6s ease, transform 0.6s ease; }
+html.js .reveal.in { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<nav class="dots" aria-label="slides">
+  <a href="#s1" title="Hero"></a>
+  <a href="#s2" title="What is Pulsar"></a>
+  <a href="#s3" title="The slopfork"></a>
+  <a href="#s4" title="Stack"></a>
+  <a href="#s5" title="Live screenshots"></a>
+  <a href="#s6" title="Adapter port"></a>
+  <a href="#s7" title="The diff"></a>
+  <a href="#s8" title="Where Lynx differs"></a>
+  <a href="#s9" title="The UI port"></a>
+  <a href="#s10" title="Harness Engineering"></a>
+  <a href="#s11" title="The slopfork recipe"></a>
+  <a href="#s12" title="Credits"></a>
+</nav>
+
+<!-- =========================================================
+     1. HERO
+========================================================= -->
+<section id="s1" class="slide hero" data-num="01 / 12">
+  <div class="hero-grid">
+    <div class="reveal">
+      <p class="eyebrow">A Hackathon Story · 2026</p>
+      <h1 class="hero">Pulsar,<br>now in <em>Lynx.</em></h1>
+      <p class="lede">A native, dual-thread port of Software Mansion's haptics SDK demo —
+      ported from React Native to Lynx <strong>without writing the same app twice</strong>.</p>
+      <p class="byline" style="margin-top: 32px;">huxpro@gmail.com · ByteDance Lynx · 2026</p>
+    </div>
+    <div class="reveal phones">
+      <div class="phone"><img src="assets/home.png" alt="Home"></div>
+      <div class="phone"><img src="assets/presets.png" alt="Presets"></div>
+      <div class="phone"><img src="assets/playground.png" alt="Playground"></div>
+      <div class="phone"><img src="assets/demos.png" alt="Demos"></div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     2. WHAT IS PULSAR
+========================================================= -->
+<section id="s2" class="slide" data-num="02 / 12">
+  <p class="eyebrow reveal">Context</p>
+  <h2 class="reveal">What is <em>Pulsar?</em></h2>
+  <div class="split reveal" style="margin-top: 24px;">
+    <div>
+      <p class="lede" style="margin-top: 0;">A cross-platform, designer-grade haptics SDK by
+      <strong>Software Mansion</strong> — native Swift on iOS, native Kotlin on Android,
+      with a polished React Native adapter shipping in production.</p>
+      <p>It includes 151 hand-crafted haptic <em>presets</em> (Anvil, Heartbeat, BalloonPop…),
+      a <strong>PatternComposer</strong> for arbitrary discrete + continuous patterns, and a
+      <strong>RealtimeComposer</strong> that streams amplitude/frequency in real-time.</p>
+      <p>The official <code class="inline">PulsarApp</code> demo (Expo Router, ~5,000 LOC of UI)
+      is the polished showcase — 4 tabs, 7 demo screens, full design system.
+      It's the artifact we're porting.</p>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px;">
+        <span class="tag">iOS Swift SDK</span>
+        <span class="tag">Android Kotlin SDK</span>
+        <span class="tag">React Native (TurboModule)</span>
+        <span class="tag">151 haptic presets</span>
+        <span class="tag">Apache 2.0</span>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <h3>What you feel</h3>
+        <p style="font-size: 16px;">Tap <em>BreakingWave</em> on iPhone Pro — three measured taps, then
+        a stronger landing. Not a buzz. Not a click. A <strong>texture</strong>.</p>
+        <h3 style="margin-top: 20px;">Why port it</h3>
+        <p style="font-size: 16px;">Pulsar is a perfect test case for Lynx Native Modules — non-trivial
+        sync return values, real-time streaming, hooks across the dual-thread boundary, and 1,300+ lines
+        of mostly-mechanical TS to translate.</p>
+        <p style="font-size: 16px;">It also <em>looks</em> good. Hackathons reward visible craft.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     3. THE SLOPFORK
+========================================================= -->
+<section id="s3" class="slide" data-num="03 / 12">
+  <p class="eyebrow reveal">The Move</p>
+  <h2 class="reveal">A <em>slopfork.</em></h2>
+  <div class="split reveal" style="margin-top: 24px;">
+    <div>
+      <p class="lede" style="margin-top:0">A <strong>slopfork</strong> is the agent-era version of a port:
+        we don't rewrite from scratch and we don't translate one-to-one — we let the model
+        re-derive each layer from a reference, holding shape constant where it can and admitting
+        platform reality where it can't.</p>
+      <p>For Pulsar that means three layered repros:</p>
+      <ul>
+        <li><strong><code class="inline">lynx-pulsar</code></strong> — the Native Module library (Swift/Kotlin bridges + TS surface)</li>
+        <li><strong><code class="inline">lynx-pulsar-demo</code></strong> — the minimal SDK test harness (ports <code class="inline">react-native/PulsarApp/</code>)</li>
+        <li><strong><code class="inline">lynx-pulsar-app</code></strong> — the polished port of the official <code class="inline">PulsarApp/</code></li>
+      </ul>
+      <p>Each one is a <em>known-good twin</em> the next layer can fall back to when ReactLynx
+      breaks in surprising ways.</p>
+    </div>
+    <div>
+      <div class="pipeline">
+        <div class="pipe-row">
+          <div class="pipe-box shared">Swift SDK<span class="sub">iOS / CoreHaptics</span></div>
+          <div class="pipe-mid">untouched</div>
+          <div class="pipe-box shared">Kotlin SDK<span class="sub">Android / Vibrator</span></div>
+        </div>
+        <div class="pipe-row">
+          <div class="pipe-box muted">react-native-pulsar<span class="sub">TurboModule · 1,079 LOC</span></div>
+          <div class="pipe-mid">→ port →</div>
+          <div class="pipe-box">lynx-pulsar<span class="sub">NativeModule · 815 LOC</span></div>
+        </div>
+        <div class="pipe-row">
+          <div class="pipe-box muted">PulsarApp<span class="sub">Expo Router · 5,001 LOC</span></div>
+          <div class="pipe-mid">→ slopfork →</div>
+          <div class="pipe-box">lynx-pulsar-app<span class="sub">Rspeedy · 2,846 LOC</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     4. THE STACK — paired stacks with shared SDK at the bottom
+========================================================= -->
+<section id="s4" class="slide" data-num="04 / 12">
+  <p class="eyebrow reveal">Architecture</p>
+  <h2 class="reveal">Two adapters, one engine.</h2>
+  <p class="lede reveal" style="margin-top: 8px;">The Swift and Kotlin Pulsar SDKs are mirrored into both adapters
+  via source inclusion. The frame on top — RN vs Lynx — is what we rewrote.</p>
+
+  <div class="arch reveal" style="margin-top: 32px;">
+    <div class="arch-col">
+      <h3 class="arch-title arch-title--rn">React Native</h3>
+      <div class="arch-row">
+        <span class="arch-lbl">APP</span>
+        <span class="arch-val">PulsarApp (Expo Router)</span>
+        <span class="arch-sub">app/, components/, hooks/ · 8,259 LOC</span>
+      </div>
+      <div class="arch-row">
+        <span class="arch-lbl">JS Adapter</span>
+        <span class="arch-val">react-native-pulsar</span>
+        <span class="arch-sub">TurboModule · 1,079 LOC · <em class="arch-em">'worklet'</em> directives</span>
+      </div>
+      <div class="arch-row">
+        <span class="arch-lbl">iOS bridge</span>
+        <span class="arch-val">Haptics.mm · 200 LOC</span>
+      </div>
+      <div class="arch-row">
+        <span class="arch-lbl">Android bridge</span>
+        <span class="arch-val">PulsarModule.kt · 213 LOC</span>
+      </div>
+    </div>
+    <div class="arch-mid">→<br>=<br>←</div>
+    <div class="arch-col">
+      <h3 class="arch-title arch-title--lynx">ReactLynx</h3>
+      <div class="arch-row arch-row--accent">
+        <span class="arch-lbl">APP</span>
+        <span class="arch-val">lynx-pulsar-app (Rspeedy)</span>
+        <span class="arch-sub">Single-file App.tsx · 2,846 LOC incl. CSS</span>
+      </div>
+      <div class="arch-row arch-row--accent">
+        <span class="arch-lbl">JS Adapter</span>
+        <span class="arch-val">lynx-pulsar</span>
+        <span class="arch-sub">NativeModule · 815 LOC · <em class="arch-em">no worklets</em></span>
+      </div>
+      <div class="arch-row arch-row--accent">
+        <span class="arch-lbl">iOS bridge</span>
+        <span class="arch-val">PulsarLynxModule.m · 180 LOC</span>
+      </div>
+      <div class="arch-row arch-row--accent">
+        <span class="arch-lbl">Android bridge</span>
+        <span class="arch-val">PulsarLynxModule.kt · 195 LOC</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arch-shared reveal">
+    <span class="arch-lbl">SHARED, UNCHANGED</span>
+    <span class="arch-val">iOS Pulsar.swift (mirrored to <code style="font-family:var(--mono);font-size:14px;">deps/Pulsar/</code>) · Android Pulsar.kt (Gradle <code style="font-family:var(--mono);font-size:14px;">sourceSets</code>)</span>
+    <span class="arch-sub">Zero native SDK modifications. Mirror strategy matches the RN package 1:1.</span>
+  </div>
+</section>
+
+<!-- =========================================================
+     5. LIVE SCREENSHOTS
+========================================================= -->
+<section id="s5" class="slide" data-num="05 / 12">
+  <p class="eyebrow reveal">Repro · captured headlessly from the running Lynx dev server</p>
+  <h2 class="reveal">It actually <em>runs.</em></h2>
+  <p class="lede reveal">Captured from <code class="inline">rspeedy dev</code> via headless Chrome —
+  the same bundle <code class="inline">main.lynx.bundle</code> that LynxExplorer loads on iPhone.</p>
+  <div class="tabstrip reveal">
+    <figure><img src="assets/home.png" alt="Home"><figcaption>Home · connect device</figcaption></figure>
+    <figure><img src="assets/presets.png" alt="Presets"><figcaption>Presets · 151 cards</figcaption></figure>
+    <figure><img src="assets/playground.png" alt="Playground"><figcaption>Playground · record + replay</figcaption></figure>
+    <figure><img src="assets/demos.png" alt="Demos"><figcaption>Demos · 7 mini-screens</figcaption></figure>
+  </div>
+</section>
+
+<!-- =========================================================
+     6. ADAPTER PORT — the numbers (enhanced: reuse bar + 6 metrics)
+========================================================= -->
+<section id="s6" class="slide" data-num="06 / 12">
+  <p class="eyebrow reveal">Layer ② · lynx-pulsar</p>
+  <h2 class="reveal">~70% reused. ~20% adapted. ~10% net new.</h2>
+  <p class="lede reveal">Most of the React Native adapter's TS surface mapped 1:1 to Lynx.
+  The TurboModule scaffolding and the worklet boilerplate just <em>fell off</em>.</p>
+
+  <div class="reuse-bar reveal">
+    <div class="reused">70% · REUSED 1:1 — Swift + Kotlin SDKs, preset names, type shapes</div>
+    <div class="adapted">20% · ADAPTED — imports, hooks, JSX → Lynx primitives</div>
+    <div class="net-new">10% · NEW</div>
+  </div>
+
+  <!-- Top row: three statement metrics -->
+  <div class="split thirds reveal" style="margin-top: 28px;">
+    <div class="metric">
+      <span class="num">1,079 → 815</span>
+      <span class="label">RN → Lynx adapter LOC</span>
+      <span class="note"><strong>76%</strong> of the original size. The deletion is the TurboModule wiring, not the logic.</span>
+    </div>
+    <div class="metric">
+      <span class="num accent">197</span>
+      <span class="label">'worklet' directives removed</span>
+      <span class="note">ReactLynx doesn't have Reanimated worklets — the background thread is the default.</span>
+    </div>
+    <div class="metric">
+      <span class="num accent">198</span>
+      <span class="label">Pulsar_X → X renames</span>
+      <span class="note">The TurboModule prefix convention is gone. Methods just have their natural names.</span>
+    </div>
+  </div>
+
+  <!-- Second row: three supporting metrics -->
+  <div class="metric-grid reveal" style="margin-top: 18px;">
+    <div class="metric-compact">
+      <span class="num ok">0</span>
+      <span class="label">Native SDK lines changed</span>
+      <span class="note">Swift &amp; Kotlin source-mirrored via <code class="inline">deps/Pulsar/</code> and Gradle <code class="inline">sourceSets</code>.</span>
+    </div>
+    <div class="metric-compact">
+      <span class="num">7</span>
+      <span class="label">TS files in lynx-pulsar/src/</span>
+      <span class="note">Down from 9 in RN — <code class="inline">useSharableState</code> &amp; <code class="inline">useAdaptiveHaptics</code> are no longer needed.</span>
+    </div>
+    <div class="metric-compact">
+      <span class="num accent">1,349</span>
+      <span class="label">Lines in App.tsx</span>
+      <span class="note">All components in one file — sidesteps ReactLynx's multi-file snapshot crashes.</span>
+    </div>
+  </div>
+
+  <p class="reveal" style="margin-top:28px; max-width: 920px; color: var(--sub);">
+    The <code class="inline">Presets.ts</code> file — the flat map of 151 named presets — is essentially the same file
+    in both ports. Same nested namespace shape, same string literals to the native side. That's
+    <strong>1,368 lines of pure config</strong> the slopfork carried across untouched.</p>
+</section>
+
+<!-- =========================================================
+     7. THE DIFF
+========================================================= -->
+<section id="s7" class="slide" data-num="07 / 12">
+  <p class="eyebrow reveal">The shape of the edit</p>
+  <h2 class="reveal">Same hook. Two worlds.</h2>
+  <p class="lede reveal" style="max-width:900px;"><code class="inline">usePatternComposer</code> — the hook a Pulsar app uses
+  to parse and play a pattern — written once for React Native, once for Lynx. The structure is identical.
+  The differences are mechanical.</p>
+
+  <div class="split reveal" style="margin-top: 32px;">
+    <div>
+      <p class="code-title"><span class="badge rn">React Native</span> react-native-pulsar/src/usePatternComposer.ts</p>
+<pre class="code"><span class="del"><span class="k">import</span> { useCallback, useEffect } <span class="k">from</span> <span class="s">'react'</span>;</span>
+<span class="del"><span class="k">import</span> Pulsar <span class="k">from</span> <span class="s">'./NativeRNPulsar'</span>;</span>
+<span class="k">import type</span> { Pattern, PatternComposer } <span class="k">from</span> <span class="s">'./types'</span>;
+<span class="del"><span class="k">import</span> { useSharableState } <span class="k">from</span> <span class="s">'./useSharableState'</span>;</span>
+
+<span class="c">// workaround for RN prototype caching issue</span>
+<span class="del">Pulsar.PatternComposer_play;</span>
+
+<span class="k">export default function</span> <span class="id">usePatternComposer</span>(pattern?: <span class="t">Pattern</span>): <span class="t">PatternComposer</span> {
+<span class="del">  <span class="k">const</span> patternId = useSharableState(-<span class="n">1</span>);</span>
+
+  <span class="k">const</span> play = useCallback(() => {
+<span class="del">    <span class="s">'worklet'</span>;</span>
+<span class="del">    <span class="k">const</span> id = patternId.get();</span>
+    <span class="k">if</span> (id !== -<span class="n">1</span>) {
+<span class="del">      Pulsar.PatternComposer_play(id);</span>
+    }
+  }, []);
+  <span class="c">// ... stop, parse, isParsed — same shape</span>
+}</pre>
+    </div>
+    <div>
+      <p class="code-title"><span class="badge lynx">Lynx</span> lynx-pulsar/src/usePatternComposer.ts</p>
+<pre class="code"><span class="add"><span class="k">import</span> { useCallback, useEffect, useRef } <span class="k">from</span> <span class="s">'@lynx-js/react'</span>;</span>
+<span class="add"><span class="k">import</span> Pulsar <span class="k">from</span> <span class="s">'./NativePulsar'</span>;</span>
+<span class="k">import type</span> { Pattern, PatternComposer } <span class="k">from</span> <span class="s">'./types'</span>;
+
+
+
+<span class="c">// no prototype workaround needed</span>
+
+
+<span class="k">export default function</span> <span class="id">usePatternComposer</span>(pattern?: <span class="t">Pattern</span>): <span class="t">PatternComposer</span> {
+<span class="add">  <span class="k">const</span> patternIdRef = useRef&lt;<span class="t">number</span>&gt;(-<span class="n">1</span>);</span>
+
+  <span class="k">const</span> play = useCallback(() => {
+
+
+<span class="add">    <span class="k">const</span> id = patternIdRef.current;</span>
+    <span class="k">if</span> (id !== -<span class="n">1</span>) {
+<span class="add">      Pulsar.patternPlay(id);</span>
+    }
+  }, []);
+  <span class="c">// ... stop, parse, isParsed — same shape</span>
+}</pre>
+    </div>
+  </div>
+  <p class="reveal" style="margin-top: 24px; color: var(--sub); max-width: 900px;">
+    <strong>Net result:</strong> import path, the worklet directive, and the
+    method-name prefix are gone. The shared-mutable-state primitive becomes a
+    plain <code class="inline">useRef</code> — Lynx's dual-thread model already
+    runs hooks on the background thread, so there's no shared-memory hop to bridge.</p>
+
+  <p class="mini-compare-label reveal"><span class="num">2</span>Presets — drop the worklet + the method prefix</p>
+  <div class="mini-compare reveal">
+    <div>
+      <p class="code-title"><span class="badge rn">RN</span> Presets.ts</p>
+<pre class="code"><span class="del"><span class="k">import</span> Pulsar <span class="k">from</span> <span class="s">'./NativeRNPulsar'</span>;</span>
+<span class="del">Pulsar.Pulsar_play; <span class="c">// RN prototype-cache workaround</span></span>
+
+<span class="k">export const</span> <span class="id">dogBark</span> = () =&gt; {
+<span class="del">  <span class="s">'worklet'</span>;</span>
+<span class="del">  Pulsar.Pulsar_play(<span class="s">'DogBark'</span>);</span>
+};</pre>
+    </div>
+    <div>
+      <p class="code-title"><span class="badge lynx">Lynx</span> Presets.ts</p>
+<pre class="code"><span class="add"><span class="k">import</span> Pulsar <span class="k">from</span> <span class="s">'./NativePulsar'</span>;</span>
+
+
+<span class="k">export const</span> <span class="id">dogBark</span> = () =&gt; {
+
+<span class="add">  Pulsar.play(<span class="s">'DogBark'</span>);</span>
+};</pre>
+    </div>
+  </div>
+
+  <p class="mini-compare-label reveal"><span class="num">3</span>JSX primitives change; events use <code class="inline" style="font-size:14px;">bindtap</code></p>
+  <div class="mini-compare reveal">
+    <div>
+      <p class="code-title"><span class="badge rn">RN</span> PulsarApp tab bar</p>
+<pre class="code"><span class="k">&lt;Pressable</span> onPress={() =&gt; setTab(<span class="s">'home'</span>)}<span class="k">&gt;</span>
+  <span class="k">&lt;Image</span> source={iconHome} <span class="k">/&gt;</span>
+  <span class="k">&lt;Text&gt;</span>Home<span class="k">&lt;/Text&gt;</span>
+<span class="k">&lt;/Pressable&gt;</span></pre>
+    </div>
+    <div>
+      <p class="code-title"><span class="badge lynx">Lynx</span> App.tsx tab bar</p>
+<pre class="code"><span class="k">&lt;</span><span class="hi">view</span> className=<span class="s">"tab"</span> <span class="hi">bindtap</span>={handleTabHome}<span class="k">&gt;</span>
+  <span class="k">&lt;</span><span class="hi">image</span> src={iconHomeActive}
+         style={{ width:<span class="s">"24px"</span>, height:<span class="s">"24px"</span> }} <span class="k">/&gt;</span>
+  <span class="k">&lt;</span><span class="hi">text</span> className=<span class="s">"tab-label"</span><span class="k">&gt;</span>Home<span class="k">&lt;/</span><span class="hi">text</span><span class="k">&gt;</span>
+<span class="k">&lt;/</span><span class="hi">view</span><span class="k">&gt;</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     8. WHERE LYNX DIFFERS
+========================================================= -->
+<section id="s8" class="slide" data-num="08 / 12">
+  <p class="eyebrow reveal">Layer ③ · ReactLynx App · the not-so-mechanical parts</p>
+  <h2 class="reveal">Where Lynx <em>actually</em> differs.</h2>
+  <p class="lede reveal" style="max-width: 900px;">The adapter port is mechanical. The UI port is not.
+  ReactLynx looks like React but enforces a different runtime contract — and the things that
+  break first are the things React idioms make you reach for first.</p>
+
+  <div class="diff-list reveal" style="margin-top: 28px;">
+    <div class="diff-item warn">
+      <div class="heading">No conditional JSX</div>
+      <div class="body"><code>{cond && &lt;X/&gt;}</code> and ternaries <strong>crash the dual-thread snapshot system</strong>.
+      Render both branches, toggle <code>style={{ display: ... }}</code>. Every tab panel and every
+      demo sub-view in this app exists in the tree at all times.</div>
+    </div>
+    <div class="diff-item warn">
+      <div class="heading"><code style="font-family:var(--mono);font-size:14px;background:none;color:inherit;padding:0;">display: none</code> isn't enough</div>
+      <div class="body">In a flex container, <code>display: none</code> doesn't reliably hide a child.
+      The working pattern is <code>position: absolute</code> + <code>width/height: 100%</code> + <code>zIndex</code>,
+      with <code>overflow: hidden</code> on the parent.</div>
+    </div>
+    <div class="diff-item warn">
+      <div class="heading">No <code style="font-family:var(--mono);font-size:14px;background:none;color:inherit;padding:0;">.map()</code> with dynamic keys</div>
+      <div class="body">Using <code>key</code> to force remount, or toggling <code>display:none</code> inside
+      <code>.map()</code>, both trigger <code>snapshotPatchApply</code> / <code>insertBefore</code> crashes.
+      Use <code>opacity</code> + absolute positioning inside lists.</div>
+    </div>
+    <div class="diff-item">
+      <div class="heading">Elements + events</div>
+      <div class="body"><code>&lt;View&gt;</code> → <code>&lt;view&gt;</code>, <code>&lt;Text&gt;</code> → <code>&lt;text&gt;</code>,
+      <code>onPress</code> → <code>bindtap</code>, <code>onTouchStart</code> → <code>bindtouchstart</code>.
+      Text MUST be inside a <code>&lt;text&gt;</code>; bare strings in views are a build error.</div>
+    </div>
+    <div class="diff-item">
+      <div class="heading">CSS reality check</div>
+      <div class="body"><code>text-transform</code> isn't supported. All lengths need units (<code>"24px"</code>, not <code>24</code>).
+      <code>display: flex</code> defaults to <strong>row</strong>. <code>overflow: scroll</code> is unsupported —
+      use <code>&lt;scroll-view scroll-y&gt;</code>. <code>&lt;image&gt;</code> needs explicit pixel dimensions.</div>
+    </div>
+    <div class="diff-item warn">
+      <div class="heading">No gesture-handler</div>
+      <div class="body">The Playground's swipe-to-draw and the Slider demo were rebuilt on raw
+      <code>bindtouchstart/move/end</code>. The Sensor Haptics demo's accelerometer-driven dot lost its accelerometer entirely
+      (no API yet) — fell back to touch drag with the original physics intact.</div>
+    </div>
+    <div class="diff-item good">
+      <div class="heading">Dual-thread guard for NativeModules</div>
+      <div class="body"><code>NativeModules</code> only exists on the <em>background</em> thread. The main thread evaluates
+      JSX snapshots. The adapter wraps with <code>typeof NativeModules !== 'undefined'</code> so the module file is
+      safe to import on both threads.</div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     9. THE UI PORT — code reuse + losses
+========================================================= -->
+<section id="s9" class="slide" data-num="09 / 12">
+  <p class="eyebrow reveal">Layer ③ · the slopfork</p>
+  <h2 class="reveal">What carried across.</h2>
+  <p class="lede reveal" style="max-width: 920px;">Component code didn't survive — the JSX, the CSS, and the event model are too
+  different to copy. But the <em>shape</em> of the app did: layout, design tokens, copy, animation timings, preset metadata.</p>
+
+  <div class="split thirds reveal" style="margin-top: 32px;">
+    <div class="metric">
+      <span class="num">100%</span>
+      <span class="label">Design tokens carried over</span>
+      <span class="note">Navy <code class="inline">#001A72</code>, sky <code class="inline">#e1f3fa</code>,
+      border <code class="inline">#38ACDD</code>, offset shadow — pixel-identical to the original.</span>
+    </div>
+    <div class="metric">
+      <span class="num">100%</span>
+      <span class="label">Preset metadata reused</span>
+      <span class="note">All 151 names, descriptions, tags, and durations come from the source app.
+      The preset images are the original PNGs.</span>
+    </div>
+    <div class="metric">
+      <span class="num warn">0%</span>
+      <span class="label">JSX components reused</span>
+      <span class="note">Every component is rewritten. But there's only one file
+      (<code class="inline">App.tsx</code>, 1,349 LOC) because multi-file imports trigger snapshot errors.</span>
+    </div>
+  </div>
+
+  <div class="split reveal" style="margin-top: 40px;">
+    <div>
+      <h3>Things the slopfork lost</h3>
+      <ul>
+        <li>React Navigation → re-implemented as 4 always-mounted <code class="inline">&lt;view&gt;</code> panels with show/hide</li>
+        <li>Expo Router file-based routing → a single state variable <code class="inline">activeTab</code></li>
+        <li><code class="inline">react-native-gesture-handler</code> → raw touch events</li>
+        <li>SVG icons → exported PNG sprites (8 of them, in two states each)</li>
+        <li>Accelerometer → touch-drag fallback (graceful degrade, with a label saying so)</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Things the slopfork gained</h3>
+      <ul>
+        <li>A single bundle that boots into LynxExplorer with the dev server's QR code</li>
+        <li>3D press effect on every button (CSS transforms — no Reanimated needed)</li>
+        <li>A preset playback progress ring driven by a <code class="inline">setInterval</code>
+            on the background thread (no worklet boundary to cross)</li>
+        <li>A dual-thread story that's easier to explain than RN's: "snapshot on main, everything else on background"</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     10. HARNESS ENGINEERING
+========================================================= -->
+<section id="s10" class="slide" data-num="10 / 12">
+  <p class="eyebrow reveal">The Meta</p>
+  <h2 class="reveal">Harness Engineering, applied.</h2>
+  <p class="lede reveal" style="max-width:920px;">The interesting deliverable isn't the app. It's the <strong>recipe</strong>
+  for getting an agent to do this kind of port reliably. Eight things we deliberately built into the loop:</p>
+
+  <div class="pillars reveal">
+    <div class="pillar">
+      <span class="num">01</span>
+      <h4>Layered AGENTS.md memory</h4>
+      <p>Two files: <code>lynx/AGENTS.md</code> (adapter + Explorer) and <code>lynx/lynx-pulsar-app/AGENTS.md</code>
+      (app port + Lynx CSS rules). Routed from <code>CLAUDE.md</code> with "read this first" headers.</p>
+    </div>
+    <div class="pillar">
+      <span class="num">02</span>
+      <h4>PRD-driven execution</h4>
+      <p>Five PRDs (<code>prd-lynx-adapter</code>, <code>android-support</code>, <code>app-port</code>, <code>bugfix-layout</code>,
+      <code>demos-hifi</code>) each carrying a <em>Verification Protocol</em>: lynx-docs check → build →
+      DevTool screenshot → console-error check per story.</p>
+    </div>
+    <div class="pillar">
+      <span class="num">03</span>
+      <h4>Known-good twin as oracle</h4>
+      <p>The minimal <code>lynx-pulsar-demo</code> stays canonical for "what definitely works in
+      ReactLynx." When the polished app breaks, the bugfix PRD's answer is <em>"copy the demo's CSS."</em></p>
+    </div>
+    <div class="pillar">
+      <span class="num">04</span>
+      <h4>Closed-loop visual verification</h4>
+      <p>The <code>lynx-devtool</code> skill takes a screenshot after every build. Errors come from
+      <code>get-console</code>. Headless Chrome captures the web preview for the deck.
+      No human-in-the-loop screenshot review needed.</p>
+    </div>
+    <div class="pillar">
+      <span class="num">05</span>
+      <h4>/goal Stop hook</h4>
+      <p>Binds the agent to a long-running deliverable (this deck, that PRD) until the
+      condition holds. Stops are blocked until the work is done — no premature "should I continue?"</p>
+    </div>
+    <div class="pillar">
+      <span class="num">06</span>
+      <h4>Parallel subagents</h4>
+      <p>Explore for read-only lookups; general-purpose for full multi-step subtasks (mining
+      session JSONLs while the main agent runs the dev server and captures screenshots).
+      Independent work runs concurrently.</p>
+    </div>
+    <div class="pillar">
+      <span class="num">07</span>
+      <h4>Platform constraints become harness rules</h4>
+      <p>"Keep everything in one <code>App.tsx</code>" isn't a style preference — it's a hard rule
+      because multi-file imports trip ReactLynx's snapshot system. Codified in AGENTS.md, not in
+      reviewer's head.</p>
+    </div>
+    <div class="pillar">
+      <span class="num">08</span>
+      <h4>Personal mistake log</h4>
+      <p>The user's global <code>CLAUDE.md</code> carries five engineering principles
+      ("说不清解决什么问题的改动，就不该做" · "编译通过 ≠ 能用") harvested from
+      prior pushbacks. Lessons travel across projects.</p>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     11. SLOPFORK RECIPE
+========================================================= -->
+<section id="s11" class="slide" data-num="11 / 12">
+  <p class="eyebrow reveal">Repeatable</p>
+  <h2 class="reveal">The <em>slopfork</em> recipe.</h2>
+  <p class="lede reveal" style="max-width:920px;">If you want to do this for another React Native package — Reanimated, Skia,
+  Gesture Handler, anything with a Native Module shape — here's the order that worked:</p>
+
+  <div class="reveal" style="margin-top: 32px; display: grid; gap: 14px; max-width: 1000px;">
+    <div class="diff-item good">
+      <div class="heading">① Port the adapter first</div>
+      <div class="body">It's mostly mechanical. Lock down the API surface, write a sync-return test harness
+      (<code>test-sync-returns/</code>), <em>then</em> touch any UI.</div>
+    </div>
+    <div class="diff-item good">
+      <div class="heading">② Build a minimal demo before the polished one</div>
+      <div class="body">A 5-screen test harness that exercises every API call. When the polished port breaks,
+      you have a known-good reference and a place to bisect.</div>
+    </div>
+    <div class="diff-item good">
+      <div class="heading">③ Codify platform constraints in AGENTS.md</div>
+      <div class="body">Don't trust the agent to re-derive "ReactLynx hates conditional JSX" every session.
+      Write it down, route it from CLAUDE.md, link from PRDs.</div>
+    </div>
+    <div class="diff-item good">
+      <div class="heading">④ One PRD per coherent unit of work, with a Verification Protocol</div>
+      <div class="body">Lynx-docs lookup → build passes → DevTool screenshot → console-error check.
+      Every story. No skipping the visual verification step.</div>
+    </div>
+    <div class="diff-item good">
+      <div class="heading">⑤ Don't refactor without a concrete bug to point at</div>
+      <div class="body">"说不清解决什么问题的改动，就不该做." Compile-passing is not the same as working.
+      End-to-end verify on device before declaring done.</div>
+    </div>
+    <div class="diff-item good">
+      <div class="heading">⑥ Treat the agent as a colleague, not a worker</div>
+      <div class="body">Goal hooks, durable memory, layered repros, parallel subagents.
+      You're not asking it to write code — you're shipping a project together.</div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     12. END
+========================================================= -->
+<section id="s12" class="slide end" data-num="12 / 12">
+  <div class="reveal">
+    <p class="eyebrow">Fin.</p>
+    <h1 class="hero">Slopfork it.</h1>
+    <p class="lede" style="max-width: 880px;">A native, dual-thread Pulsar in ReactLynx —
+    151 presets, 6 demos, real haptics on a real iPhone — shipped from the same agent
+    loop that wrote this deck.</p>
+    <div class="bigquote">
+      <p>"编译通过 ≠ 能用，必须端到端验证."</p>
+      <cite>— global CLAUDE.md, prior-pushback section</cite>
+    </div>
+    <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 32px;">
+      <span class="pill">huxpro@gmail.com</span>
+      <span class="pill">ByteDance · Lynx</span>
+      <span class="pill">Hackathon 2026</span>
+    </div>
+    <p class="byline" style="margin-top: 48px;">Press <kbd style="font-family:var(--mono);background:rgba(255,255,255,0.1);padding:2px 8px;border-radius:4px;border:1px solid var(--tab-off);">↑↓</kbd> or click the dots to navigate.</p>
+  </div>
+</section>
+
+<script>
+document.documentElement.classList.add("js");
+// reveal on scroll
+const io = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    if (e.isIntersecting) e.target.classList.add("in");
+  }
+}, { threshold: 0.15 });
+document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
+// keyboard nav
+const slides = [...document.querySelectorAll("section.slide")];
+let current = 0;
+function go(delta) {
+  current = Math.max(0, Math.min(slides.length - 1, current + delta));
+  slides[current].scrollIntoView({ behavior: "smooth", block: "start" });
+}
+addEventListener("keydown", (e) => {
+  if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); go(1); }
+  else if (e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); go(-1); }
+  else if (e.key === "Home") { current = 0; slides[0].scrollIntoView(); }
+  else if (e.key === "End") { current = slides.length - 1; slides[current].scrollIntoView(); }
+});
+
+// track current
+const oio = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    if (e.isIntersecting && e.intersectionRatio > 0.5) {
+      current = slides.indexOf(e.target);
+    }
+  }
+}, { threshold: [0.5] });
+slides.forEach((s) => oio.observe(s));
+</script>
+</body>
+</html>
