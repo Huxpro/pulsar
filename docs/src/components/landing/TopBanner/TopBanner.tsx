@@ -8,7 +8,13 @@ import arrowIcon from '../../../assets/landing-page/arrow.svg';
 import { Button } from '../Button/Button';
 import { EmojiButton } from '../EmojiButton/EmojiButton';
 import { SoundBar } from '../SoundBar/SoundBar';
-import { useState } from 'react';
+import { AudioPatternUtility } from '../../../content/docs/components/Preset/audio-player';
+import type { PatternData } from '../../../content/docs/components/Preset/types';
+import BreathPreset from '../../../content/docs/assets/presets/Breath.json';
+import TriumphPreset from '../../../content/docs/assets/presets/Triumph.json';
+import BalloonPopPreset from '../../../content/docs/assets/presets/BalloonPop.json';
+import HeartbeatPreset from '../../../content/docs/assets/presets/Heartbeat.json';
+import { useRef, useState } from 'react';
 
 declare global {
   interface Window {
@@ -26,6 +32,22 @@ export function TopBanner() {
   const [confettiInstances, setConfettiInstances] = useState<number[]>([]);
   const [backgroundAnimation, setBackgroundAnimation] = useState(styles.wave);
   const [showDecorativeIcons, setShowDecorativeIcons] = useState(true);
+
+  const audioPlayerRef = useRef<AudioPatternUtility | null>(null);
+
+  async function playPresetAudio(preset: PatternData) {
+    try {
+      if (!audioPlayerRef.current) {
+        audioPlayerRef.current = new AudioPatternUtility();
+      }
+      audioPlayerRef.current.stop();
+      await audioPlayerRef.current.parsePattern(preset);
+      await audioPlayerRef.current.play();
+    } catch (e) {
+      // Audio context may be blocked or unsupported; emoji animations still fire.
+      console.warn('[TopBanner] audio playback failed', e);
+    }
+  }
 
   function handleAnimationEffect(
     effect: '' | 'stars' | 'angels' | 'confetti',
@@ -115,9 +137,11 @@ export function TopBanner() {
                     setColorClass('');
                     setBackgroundAnimation(styles.wave);
                     handleAnimationEffect('');
+                    void playPresetAudio(BreathPreset as unknown as PatternData);
                     window.posthog?.capture('haptics_demo_interacted', {
                       emoji: 'emoji1',
                       effect: 'wave',
+                      preset: 'Breath',
                     });
                   }}
                 />
@@ -127,9 +151,11 @@ export function TopBanner() {
                     setColorClass(styles.yellow);
                     setBackgroundAnimation(styles.sonar);
                     handleAnimationEffect('stars');
+                    void playPresetAudio(TriumphPreset as unknown as PatternData);
                     window.posthog?.capture('haptics_demo_interacted', {
                       emoji: 'emoji2',
                       effect: 'stars',
+                      preset: 'Triumph',
                     });
                   }}
                 />
@@ -142,9 +168,11 @@ export function TopBanner() {
                     setColorClass(styles.red);
                     setBackgroundAnimation(styles.quake);
                     handleAnimationEffect('confetti');
+                    void playPresetAudio(BalloonPopPreset as unknown as PatternData);
                     window.posthog?.capture('haptics_demo_interacted', {
                       emoji: 'emoji3',
                       effect: 'confetti',
+                      preset: 'BalloonPop',
                     });
                   }}
                 />
@@ -154,9 +182,11 @@ export function TopBanner() {
                     setColorClass(styles.green);
                     setBackgroundAnimation(styles.heartbeat);
                     handleAnimationEffect('angels');
+                    void playPresetAudio(HeartbeatPreset as unknown as PatternData);
                     window.posthog?.capture('haptics_demo_interacted', {
                       emoji: 'emoji4',
                       effect: 'angels',
+                      preset: 'Heartbeat',
                     });
                   }}
                 />
