@@ -211,7 +211,9 @@ nav.dots a:hover { transform: scale(1.6); background: var(--navy); }
   align-items: start;
 }
 .split.tight { gap: 24px; }
-.split.thirds { grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+.split.thirds { grid-template-columns: 1fr 1fr 1fr; gap: 24px; align-items: stretch; }
+.split.thirds .metric { display: flex; flex-direction: column; }
+.split.thirds .metric .num { font-size: clamp(40px, 4.2vw, 64px); white-space: nowrap; }
 
 .metric {
   background: var(--white);
@@ -927,7 +929,7 @@ html.js .reveal.in { opacity: 1; transform: none; }
 
   <div class="split thirds reveal" style="margin-top: 28px;">
     <div class="metric">
-      <span class="num" style="font-size: clamp(40px, 4.2vw, 64px); white-space: nowrap;">1,079 → 815</span>
+      <span class="num">1,079 → 815</span>
       <span class="label">RN → Lynx 适配层行数</span>
       <span class="note">缩到原来的 <strong>76%</strong>。少掉的是 TurboModule 接线，不是业务逻辑。</span>
     </div>
