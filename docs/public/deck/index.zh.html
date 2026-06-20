@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<title>Pulsar → Lynx · Slopfork Recipe</title>
+<title>Pulsar → Lynx · Slopfork 配方</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 /* === Pulsar palette === */
 :root {
@@ -19,8 +19,8 @@
   --ok:      #57B495;
   --white:   #ffffff;
   --shadow:  -3px 3px 0 #38ACDD;
-  --serif:   "DM Serif Display", "Times New Roman", serif;
-  --sans:    "DM Sans", -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+  --serif:   "DM Serif Display", "Noto Serif SC", "Times New Roman", serif;
+  --sans:    "DM Sans", "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
   --mono:    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
@@ -29,7 +29,6 @@ html, body { margin: 0; padding: 0; background: var(--bg); color: var(--navy); f
 
 html {
   scroll-behavior: smooth;
-  /* proximity (not mandatory) so taller slides don't get clipped */
   scroll-snap-type: y proximity;
 }
 
@@ -86,8 +85,8 @@ h3 {
   font-size: 22px;
   margin: 0 0 12px;
 }
-p, li { font-size: 18px; line-height: 1.55; color: var(--navy); }
-p.lede { font-size: clamp(20px, 2.2vw, 28px); line-height: 1.4; max-width: 880px; color: var(--sub); }
+p, li { font-size: 18px; line-height: 1.7; color: var(--navy); }
+p.lede { font-size: clamp(20px, 2.2vw, 28px); line-height: 1.5; max-width: 880px; color: var(--sub); }
 p.byline { font-family: var(--mono); font-size: 13px; color: var(--sub); letter-spacing: 0.05em; }
 
 /* === Nav dots === */
@@ -239,7 +238,7 @@ nav.dots a:hover { transform: scale(1.6); background: var(--navy); }
   text-transform: uppercase;
   color: var(--sub);
 }
-.metric .note { display: block; margin-top: 12px; color: var(--navy); font-size: 16px; line-height: 1.45; }
+.metric .note { display: block; margin-top: 12px; color: var(--navy); font-size: 16px; line-height: 1.65; }
 
 /* === Code === */
 pre.code, code.inline {
@@ -257,11 +256,11 @@ pre.code {
   box-shadow: 0 14px 30px rgba(0,26,114,0.18);
   margin: 0;
 }
-pre.code .k  { color: #ffc06b; }       /* keyword */
-pre.code .s  { color: #79e3a9; }       /* string */
-pre.code .c  { color: #6b87b6; font-style: italic; } /* comment */
-pre.code .n  { color: #b5e1f1; }       /* number */
-pre.code .t  { color: #ffabaf; }       /* type */
+pre.code .k  { color: #ffc06b; }
+pre.code .s  { color: #79e3a9; }
+pre.code .c  { color: #6b87b6; font-style: italic; }
+pre.code .n  { color: #b5e1f1; }
+pre.code .t  { color: #ffabaf; }
 pre.code .id { color: #fff; font-weight: 600; }
 pre.code .del { background: rgba(255,98,89,0.18); display: block; }
 pre.code .add { background: rgba(87,180,149,0.18); display: block; }
@@ -321,50 +320,7 @@ code.inline {
   letter-spacing: 0.05em;
 }
 
-/* === Pipeline / arch === */
-.pipeline {
-  display: grid;
-  gap: 14px;
-  margin: 28px 0;
-}
-.pipe-row {
-  display: grid;
-  grid-template-columns: 220px 1fr 220px;
-  gap: 20px;
-  align-items: center;
-}
-.pipe-box {
-  background: var(--white);
-  border: 2px solid var(--border);
-  border-radius: 6px;
-  padding: 14px 18px;
-  text-align: center;
-  font-weight: 600;
-  font-size: 15px;
-  box-shadow: var(--shadow);
-}
-.pipe-box.muted { background: rgba(184,225,241,0.6); }
-.pipe-box.shared { background: linear-gradient(135deg, #fff 0%, #d3edf7 100%); border-color: var(--ok); }
-.pipe-box .sub { display: block; font-weight: 400; color: var(--sub); font-size: 12px; font-family: var(--mono); margin-top: 4px; }
-.pipe-mid {
-  text-align: center;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--sub);
-  position: relative;
-}
-.pipe-mid::before, .pipe-mid::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  width: 38%;
-  height: 2px;
-  background: var(--border);
-}
-.pipe-mid::before { left: 2%; }
-.pipe-mid::after { right: 2%; }
-
-/* === Diff list (the differences slide) === */
+/* === Diff list === */
 .diff-list { display: grid; gap: 14px; }
 .diff-item {
   display: grid;
@@ -381,40 +337,17 @@ code.inline {
   font-size: 15px;
   color: var(--navy);
 }
-.diff-item .body { color: var(--sub); font-size: 15px; line-height: 1.5; }
+.diff-item .body { color: var(--sub); font-size: 15px; line-height: 1.65; }
 .diff-item .body code { font-family: var(--mono); font-size: 13px; color: var(--navy); background: var(--tab-off); padding: 1px 6px; border-radius: 3px; }
 .diff-item.warn { border-left-color: var(--error); }
 .diff-item.good { border-left-color: var(--ok); }
-
-/* === Pillars (harness slide) === */
-.pillars {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  margin-top: 28px;
-}
-.pillar {
-  background: var(--white);
-  border: 2px solid var(--border);
-  border-radius: 6px;
-  padding: 22px;
-  box-shadow: var(--shadow);
-}
-.pillar .num {
-  font-family: var(--serif);
-  font-size: 36px;
-  line-height: 1;
-  color: var(--border);
-}
-.pillar h4 { font-family: var(--sans); font-size: 17px; font-weight: 700; margin: 6px 0 8px; }
-.pillar p { font-size: 14.5px; color: var(--sub); margin: 0; line-height: 1.5; }
 
 /* === Big quote === */
 .bigquote {
   font-family: var(--serif);
   font-size: clamp(28px, 4vw, 56px);
   font-style: italic;
-  line-height: 1.15;
+  line-height: 1.25;
   color: var(--navy);
   border-left: 8px solid var(--error);
   padding: 12px 28px;
@@ -430,7 +363,7 @@ code.inline {
   margin-top: 16px;
 }
 
-/* === footer credit slide / dark-navy slide === */
+/* === footer / dark-navy slide === */
 .slide.end {
   background: var(--navy);
   color: var(--bg);
@@ -440,7 +373,7 @@ code.inline {
 .slide.end .eyebrow, .slide.end p.lede, .slide.end p, .slide.end p.byline { color: var(--tab-off); }
 .slide.end .pill { background: transparent; border-color: var(--tab-off); color: var(--bg); }
 
-/* === Recipe ordered list (slide 8) === */
+/* === Recipe ordered list === */
 .recipe {
   list-style: none;
   counter-reset: recipe;
@@ -459,7 +392,7 @@ code.inline {
   border-radius: 4px;
   color: var(--bg);
   font-size: 16px;
-  line-height: 1.55;
+  line-height: 1.7;
 }
 .recipe li::before {
   content: counter(recipe, decimal-leading-zero);
@@ -480,7 +413,6 @@ code.inline {
   color: var(--bg);
 }
 
-/* === Bigquote on dark === */
 .slide.end .bigquote {
   border-left-color: var(--border);
   color: var(--bg);
@@ -488,21 +420,7 @@ code.inline {
 }
 .slide.end .bigquote cite { color: var(--tab-off); }
 
-/* === floating tab bar in hero === */
-.phone-tabbar {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 56px;
-  background: rgba(255,255,255,0.9);
-  border-top: 1px solid var(--tab-off);
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  font-size: 11px;
-  color: var(--sub);
-}
-
-/* === Preset showcase (slide 3) === */
+/* === Preset showcase === */
 .preset-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -531,7 +449,7 @@ code.inline {
 }
 .preset-desc {
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.65;
   color: var(--sub);
   margin: 0;
 }
@@ -551,11 +469,7 @@ code.inline {
   overflow: hidden;
   min-width: 0;
 }
-.preset-viz img {
-  width: 100%;
-  display: block;
-  border-radius: 2px;
-}
+.preset-viz img { width: 100%; display: block; border-radius: 2px; }
 .preset-indicator {
   position: absolute;
   top: 12px;
@@ -621,8 +535,8 @@ code.inline {
   text-align: center;
   margin: 0 0 4px;
 }
-.arch-title--rn   { color: var(--error); }
-.arch-title--lynx { color: var(--border); }
+.arch-title.rn   { color: var(--error); }
+.arch-title.lynx { color: var(--border); }
 .arch-row {
   background: var(--white);
   border: 2px solid var(--border);
@@ -632,7 +546,7 @@ code.inline {
   display: grid;
   gap: 4px;
 }
-.arch-row--accent {
+.arch-row.accent {
   background: linear-gradient(135deg, var(--white) 0%, rgba(56,172,221,0.08) 100%);
 }
 .arch-lbl {
@@ -652,14 +566,14 @@ code.inline {
   font-family: var(--mono);
   font-size: 12px;
   color: var(--sub);
-  line-height: 1.5;
+  line-height: 1.6;
 }
 .arch-em {
   font-style: italic;
   color: var(--error);
   font-weight: 500;
 }
-.arch-row--accent .arch-em { color: var(--ok); }
+.arch-row.accent .arch-em { color: var(--ok); }
 .arch-mid {
   display: flex; align-items: center; justify-content: center;
   font-family: var(--serif); font-size: 32px;
@@ -681,7 +595,7 @@ code.inline {
 .arch-shared .arch-val { font-size: 17px; }
 .arch-shared code { background: rgba(0,26,114,0.08); padding: 1px 8px; border-radius: 3px; }
 
-/* === Code-reuse bar (slide 6) === */
+/* === Code-reuse bar === */
 .reuse-bar {
   display: flex;
   height: 60px;
@@ -705,7 +619,7 @@ code.inline {
 .reuse-bar .adapted { background: linear-gradient(135deg, var(--border), #2487bd); flex: 2; }
 .reuse-bar .net-new { background: linear-gradient(135deg, var(--navy), #00134d); flex: 1; }
 
-/* === Compact metric grid (slide 6: 6 cards) === */
+/* === Compact metric grid === */
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -744,12 +658,10 @@ code.inline {
   margin-top: 8px;
   color: var(--navy);
   font-size: 13.5px;
-  line-height: 1.45;
+  line-height: 1.65;
 }
 
-/* === Big diff pair (slide 6: usePatternComposer side-by-side) === */
-/* Grid template prevents children from growing into intrinsic width of pre.code,
-   so long lines just scroll inside the <pre> instead of pushing the column wide. */
+/* === Big diff pair === */
 .diff-pair {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -766,7 +678,7 @@ code.inline {
   -webkit-overflow-scrolling: touch;
 }
 
-/* === Mini-diff stack (slide 7: multiple compares) === */
+/* === Mini-diff stack === */
 .mini-compare {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -801,36 +713,33 @@ code.inline {
   .preset-row { grid-template-columns: 1fr; }
   .hero-grid, .split { grid-template-columns: 1fr; }
   .split.thirds { grid-template-columns: 1fr; }
-  .pipe-row { grid-template-columns: 1fr; }
   .diff-item { grid-template-columns: 1fr; }
-  .pillars { grid-template-columns: 1fr; }
   .tabstrip { grid-template-columns: repeat(2, 1fr); }
   nav.dots { display: none; }
   .slide { padding: 56px 6vw 64px; }
 }
 
-/* === reveal-on-scroll (only when JS is enabled; default visible for capture) === */
 html.js .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.6s ease, transform 0.6s ease; }
 html.js .reveal.in { opacity: 1; transform: none; }
 </style>
 </head>
 <body>
 
-<div class="lang-switch" aria-label="language">
-  <a class="active" aria-current="page">EN</a>
+<div class="lang-switch" aria-label="语言">
+  <a href="index.html" id="lang-other">EN</a>
   <span class="sep">·</span>
-  <a href="index.zh.html" id="lang-other">中文</a>
+  <a class="active" aria-current="page">中文</a>
 </div>
 
-<nav class="dots" aria-label="slides">
-  <a href="#s1" title="Hero"></a>
-  <a href="#s2" title="What is Pulsar"></a>
-  <a href="#s3" title="Preset concepts"></a>
-  <a href="#s4" title="Architecture"></a>
-  <a href="#s5" title="Adapter port"></a>
-  <a href="#s6" title="The diff"></a>
-  <a href="#s7" title="Where Lynx differs"></a>
-  <a href="#s8" title="Slopfork recipe"></a>
+<nav class="dots" aria-label="幻灯片">
+  <a href="#s1" title="首页"></a>
+  <a href="#s2" title="什么是 Pulsar"></a>
+  <a href="#s3" title="预设概念"></a>
+  <a href="#s4" title="架构"></a>
+  <a href="#s5" title="适配层移植"></a>
+  <a href="#s6" title="代码差异"></a>
+  <a href="#s7" title="Lynx 的差异点"></a>
+  <a href="#s8" title="Slopfork 配方"></a>
 </nav>
 
 <!-- =========================================================
@@ -839,17 +748,16 @@ html.js .reveal.in { opacity: 1; transform: none; }
 <section id="s1" class="slide hero" data-num="01 / 08">
   <div class="hero-grid">
     <div class="reveal">
-      <p class="eyebrow">A Hackathon Story · 2026</p>
-      <h1 class="hero">Pulsar,<br>now in <em>Lynx.</em></h1>
-      <p class="lede">A native, dual-thread port of Software Mansion's haptics SDK demo,
-      ported from React Native to Lynx <strong>without writing the same app twice</strong>.</p>
+      <p class="eyebrow">一个黑客松故事 · 2026</p>
+      <h1 class="hero">Pulsar，<br>落地 <em>Lynx。</em></h1>
+      <p class="lede">把 Software Mansion 的触觉 SDK 演示应用，原生、双线程地从 React Native 移植到 Lynx；<strong>同一个 App 不写两遍</strong>。</p>
       <p class="byline" style="margin-top: 32px;">Hux · ByteDance Lynx · 2026</p>
     </div>
     <div class="reveal phones">
-      <div class="phone"><img src="assets/home.png" alt="Home"></div>
-      <div class="phone"><img src="assets/presets.png" alt="Presets"></div>
+      <div class="phone"><img src="assets/home.png" alt="首页"></div>
+      <div class="phone"><img src="assets/presets.png" alt="预设"></div>
       <div class="phone"><img src="assets/playground.png" alt="Playground"></div>
-      <div class="phone"><img src="assets/demos.png" alt="Demos"></div>
+      <div class="phone"><img src="assets/demos.png" alt="示例"></div>
     </div>
   </div>
 </section>
@@ -858,218 +766,214 @@ html.js .reveal.in { opacity: 1; transform: none; }
      2. WHAT IS PULSAR
 ========================================================= -->
 <section id="s2" class="slide" data-num="02 / 08">
-  <p class="eyebrow reveal">Context</p>
-  <h2 class="reveal">What is <em>Pulsar?</em></h2>
+  <p class="eyebrow reveal">背景</p>
+  <h2 class="reveal">什么是 <em>Pulsar？</em></h2>
   <p class="lede reveal" style="margin-top: 12px; max-width: 940px;">
-    A cross-platform, designer-grade haptics SDK by <strong>Software Mansion</strong>.
-    Native Swift on iOS, native Kotlin on Android, shipping in production on App Store &amp; Google Play.
+    <strong>Software Mansion</strong> 出品的跨平台、设计师级触觉 SDK。
+    iOS 原生 Swift、Android 原生 Kotlin，已在 App Store 与 Google Play 上架。
   </p>
   <p class="reveal" style="max-width: 940px;">
-    151 hand-crafted <em>presets</em>, a <strong>PatternComposer</strong> for arbitrary
-    discrete + continuous patterns, and a <strong>RealtimeComposer</strong> for gesture-driven feedback.
-    All reachable through one React Native TurboModule today.
+    151 个手工调校的 <em>预设</em>，一个 <strong>PatternComposer</strong> 用来编排任意的离散 + 连续 pattern，
+    再加一个 <strong>RealtimeComposer</strong> 处理手势驱动的反馈。
+    目前都通过一个 React Native TurboModule 暴露给上层。
   </p>
   <div class="reveal" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 28px;">
     <span class="tag">iOS Swift SDK</span>
     <span class="tag">Android Kotlin SDK</span>
     <span class="tag">React Native (TurboModule)</span>
-    <span class="tag">151 haptic presets</span>
+    <span class="tag">151 个触觉预设</span>
     <span class="tag">Apache 2.0</span>
   </div>
 </section>
 
 <!-- =========================================================
-     3. PRESET CONCEPTS: what a Pulsar preset actually is
+     3. PRESET CONCEPTS
 ========================================================= -->
 <section id="s3" class="slide" data-num="03 / 08">
-  <p class="eyebrow reveal">A Preset, Visualized</p>
-  <h2 class="reveal">A haptic <em>preset</em> is a named pattern with an envelope.</h2>
+  <p class="eyebrow reveal">预设可视化</p>
+  <h2 class="reveal">一个触觉 <em>预设</em>，就是带包络的命名 pattern。</h2>
   <p class="lede reveal" style="max-width: 940px;">
-    Each of Pulsar's 151 presets is a JSON pattern of <strong>discrete impulses</strong> (orange)
-    and a <strong>continuous envelope</strong> of amplitude + frequency (green). Same shape on the
-    wire, whether the renderer is CoreHaptics, VibrationEffect, or, now, Lynx.
+    Pulsar 的 151 个预设里，每一个都是一段 JSON：包含 <strong>离散脉冲</strong>（橙色）和
+    一条 <strong>振幅 + 频率的连续包络</strong>（绿色）。无论渲染器是 CoreHaptics、VibrationEffect，
+    还是现在的 Lynx，送到底层 SDK 的 JSON 始终是同一个形状。
   </p>
 
   <div class="preset-row reveal">
     <div class="preset-card" data-preset="Alarm">
       <div class="preset-tags">
-        <span class="tag">Bold</span><span class="tag">Rigid</span><span class="tag">Pattern</span><span class="tag">Extended</span>
+        <span class="tag">强烈</span><span class="tag">刚性</span><span class="tag">Pattern</span><span class="tag">长时</span>
       </div>
       <h3 class="preset-name">Alarm</h3>
-      <p class="preset-desc">Relentless and urgent. Best for critical errors or emergencies that require immediate attention.</p>
+      <p class="preset-desc">急促、不让人忽视。适合关键错误或需要立即响应的紧急场景。</p>
       <div class="preset-play-row">
         <div class="preset-viz">
-          <img src="assets/preset-alarm.png" alt="Alarm pattern visualization">
+          <img src="assets/preset-alarm.png" alt="Alarm 模式可视化">
           <div class="preset-indicator" aria-hidden="true"></div>
         </div>
-        <button class="preset-play" type="button" aria-label="Play Alarm">
+        <button class="preset-play" type="button" aria-label="播放 Alarm">
           <svg class="ico-play" viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           <svg class="ico-pause" viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
         </button>
       </div>
       <div class="preset-meta">
-        <span><strong>1,130 ms</strong> · 6 discrete + 13-point envelope</span>
+        <span><strong>1,130 ms</strong> · 6 个离散脉冲 + 13 点连续包络</span>
       </div>
     </div>
 
     <div class="preset-card" data-preset="FadeOut">
       <div class="preset-tags">
-        <span class="tag">Substantial</span><span class="tag">Flexible</span><span class="tag">Impulses</span><span class="tag">Extended</span>
+        <span class="tag">厚重</span><span class="tag">柔性</span><span class="tag">脉冲</span><span class="tag">长时</span>
       </div>
       <h3 class="preset-name">FadeOut</h3>
-      <p class="preset-desc">A graceful drift toward silence. Ideal for dismissals or transitions that should feel calm and natural.</p>
+      <p class="preset-desc">优雅地走向静默。适合 dismiss、过渡这类应当平稳自然的交互。</p>
       <div class="preset-play-row">
         <div class="preset-viz">
-          <img src="assets/preset-fadeout.png" alt="FadeOut pattern visualization">
+          <img src="assets/preset-fadeout.png" alt="FadeOut 模式可视化">
           <div class="preset-indicator" aria-hidden="true"></div>
         </div>
-        <button class="preset-play" type="button" aria-label="Play FadeOut">
+        <button class="preset-play" type="button" aria-label="播放 FadeOut">
           <svg class="ico-play" viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           <svg class="ico-pause" viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
         </button>
       </div>
       <div class="preset-meta">
-        <span><strong>506 ms</strong> · 6 decaying impulses</span>
+        <span><strong>506 ms</strong> · 6 个衰减脉冲</span>
       </div>
     </div>
   </div>
 
   <p class="reveal" style="max-width: 940px; margin-top: 24px; color: var(--sub); font-size: 16px;">
-    A Lynx app calls <code class="inline">Presets.alarm()</code>, and on the other side of the bridge,
-    the unchanged Swift / Kotlin SDK feeds the exact same envelope to the device's haptic actuator.
+    Lynx App 端调用 <code class="inline">Presets.alarm()</code>，桥的另一端，
+    原封不动的 Swift / Kotlin SDK 会把完全相同的包络喂给设备的触觉马达。
   </p>
 </section>
 
 <!-- =========================================================
-     4. THE STACK: paired stacks with shared SDK at the bottom
+     4. THE STACK
 ========================================================= -->
 <section id="s4" class="slide" data-num="04 / 08">
-  <p class="eyebrow reveal">Architecture</p>
-  <h2 class="reveal">Two adapters, one engine.</h2>
-  <p class="lede reveal" style="margin-top: 8px;">The Swift and Kotlin Pulsar SDKs are mirrored into both adapters
-  via source inclusion. The frame on top, RN vs Lynx, is what we rewrote.</p>
+  <p class="eyebrow reveal">架构</p>
+  <h2 class="reveal">两套适配层，同一台引擎。</h2>
+  <p class="lede reveal" style="margin-top: 8px;">底层 Swift 与 Kotlin Pulsar SDK 通过源码镜像同时进入两套适配层。
+  顶层的 RN 与 Lynx，才是这次真正重写的部分。</p>
 
   <div class="arch reveal" style="margin-top: 32px;">
     <div class="arch-col">
-      <h3 class="arch-title arch-title--rn">React Native</h3>
+      <h3 class="arch-title rn">React Native</h3>
       <div class="arch-row">
-        <span class="arch-lbl">APP</span>
+        <span class="arch-lbl">应用</span>
         <span class="arch-val">PulsarApp (Expo Router)</span>
-        <span class="arch-sub">app/, components/, hooks/ · 8,259 LOC</span>
+        <span class="arch-sub">app/, components/, hooks/ · 8,259 行</span>
       </div>
       <div class="arch-row">
-        <span class="arch-lbl">JS Adapter</span>
+        <span class="arch-lbl">JS 适配层</span>
         <span class="arch-val">react-native-pulsar</span>
-        <span class="arch-sub">TurboModule · 1,079 LOC · <em class="arch-em">'worklet'</em> directives</span>
+        <span class="arch-sub">TurboModule · 1,079 行 · 含 <em class="arch-em">'worklet'</em> 指令</span>
       </div>
       <div class="arch-row">
-        <span class="arch-lbl">iOS bridge</span>
-        <span class="arch-val">Haptics.mm · 200 LOC</span>
+        <span class="arch-lbl">iOS 桥</span>
+        <span class="arch-val">Haptics.mm · 200 行</span>
       </div>
       <div class="arch-row">
-        <span class="arch-lbl">Android bridge</span>
-        <span class="arch-val">PulsarModule.kt · 213 LOC</span>
+        <span class="arch-lbl">Android 桥</span>
+        <span class="arch-val">PulsarModule.kt · 213 行</span>
       </div>
     </div>
     <div class="arch-mid">→<br>=<br>←</div>
     <div class="arch-col">
-      <h3 class="arch-title arch-title--lynx">ReactLynx</h3>
-      <div class="arch-row arch-row--accent">
-        <span class="arch-lbl">APP</span>
+      <h3 class="arch-title lynx">ReactLynx</h3>
+      <div class="arch-row accent">
+        <span class="arch-lbl">应用</span>
         <span class="arch-val">lynx-pulsar-app (Rspeedy)</span>
-        <span class="arch-sub">Single-file App.tsx · 2,846 LOC incl. CSS</span>
+        <span class="arch-sub">单文件 App.tsx · 2,846 行（含 CSS）</span>
       </div>
-      <div class="arch-row arch-row--accent">
-        <span class="arch-lbl">JS Adapter</span>
+      <div class="arch-row accent">
+        <span class="arch-lbl">JS 适配层</span>
         <span class="arch-val">lynx-pulsar</span>
-        <span class="arch-sub">NativeModule · 815 LOC · <em class="arch-em">no worklets</em></span>
+        <span class="arch-sub">NativeModule · 815 行 · <em class="arch-em">不需要 worklet</em></span>
       </div>
-      <div class="arch-row arch-row--accent">
-        <span class="arch-lbl">iOS bridge</span>
-        <span class="arch-val">PulsarLynxModule.m · 180 LOC</span>
+      <div class="arch-row accent">
+        <span class="arch-lbl">iOS 桥</span>
+        <span class="arch-val">PulsarLynxModule.m · 180 行</span>
       </div>
-      <div class="arch-row arch-row--accent">
-        <span class="arch-lbl">Android bridge</span>
-        <span class="arch-val">PulsarLynxModule.kt · 195 LOC</span>
+      <div class="arch-row accent">
+        <span class="arch-lbl">Android 桥</span>
+        <span class="arch-val">PulsarLynxModule.kt · 195 行</span>
       </div>
     </div>
   </div>
 
   <div class="arch-shared reveal">
-    <span class="arch-lbl">SHARED, UNCHANGED</span>
-    <span class="arch-val">iOS Pulsar.swift (mirrored to <code style="font-family:var(--mono);font-size:14px;">deps/Pulsar/</code>) · Android Pulsar.kt (Gradle <code style="font-family:var(--mono);font-size:14px;">sourceSets</code>)</span>
-    <span class="arch-sub">Zero native SDK modifications. Mirror strategy matches the RN package 1:1.</span>
+    <span class="arch-lbl">共享 · 零修改</span>
+    <span class="arch-val">iOS Pulsar.swift（镜像到 <code style="font-family:var(--mono);font-size:14px;">deps/Pulsar/</code>） · Android Pulsar.kt（Gradle <code style="font-family:var(--mono);font-size:14px;">sourceSets</code>）</span>
+    <span class="arch-sub">原生 SDK 一行未改。镜像策略与 RN 包做到 1:1 对齐。</span>
   </div>
 </section>
 
 <!-- =========================================================
-     5. ADAPTER PORT: the numbers (was old slide 6)
+     5. ADAPTER PORT NUMBERS
 ========================================================= -->
 <section id="s5" class="slide" data-num="05 / 08">
-  <p class="eyebrow reveal">Layer ② · lynx-pulsar</p>
-  <h2 class="reveal">~70% reused. ~20% adapted. ~10% net new.</h2>
-  <p class="lede reveal">Most of the React Native adapter's TS surface mapped 1:1 to Lynx.
-  The TurboModule scaffolding and the worklet boilerplate just <em>fell off</em>.</p>
+  <p class="eyebrow reveal">第 ② 层 · lynx-pulsar</p>
+  <h2 class="reveal">~70% 直接复用，~20% 改写，~10% 全新。</h2>
+  <p class="lede reveal">React Native 适配层的大部分 TS 表面 1:1 映射到 Lynx。
+  TurboModule 的脚手架和 worklet 样板代码，可以 <em>整块拿掉</em>。</p>
 
   <div class="reuse-bar reveal">
-    <div class="reused">70% · REUSED 1:1 · Swift + Kotlin SDKs, preset names, type shapes</div>
-    <div class="adapted">20% · ADAPTED · imports, hooks, JSX → Lynx primitives</div>
-    <div class="net-new">10% · NEW</div>
+    <div class="reused">70% · 1:1 复用 · Swift + Kotlin SDK、预设名、类型骨架</div>
+    <div class="adapted">20% · 改写 · import、hooks、JSX → Lynx 元素</div>
+    <div class="net-new">10% · 新增</div>
   </div>
 
-  <!-- Top row: three statement metrics -->
   <div class="split thirds reveal" style="margin-top: 28px;">
     <div class="metric">
       <span class="num">1,079 → 815</span>
-      <span class="label">RN → Lynx adapter LOC</span>
-      <span class="note"><strong>76%</strong> of the original size. The deletion is the TurboModule wiring, not the logic.</span>
+      <span class="label">RN → Lynx 适配层行数</span>
+      <span class="note">缩到原来的 <strong>76%</strong>。少掉的是 TurboModule 接线，不是业务逻辑。</span>
     </div>
     <div class="metric">
       <span class="num accent">197</span>
-      <span class="label">'worklet' directives removed</span>
-      <span class="note">ReactLynx doesn't have Reanimated worklets; the background thread is the default.</span>
+      <span class="label">移除的 'worklet' 指令</span>
+      <span class="note">ReactLynx 没有 Reanimated worklet；后台线程是默认。</span>
     </div>
     <div class="metric">
       <span class="num accent">198</span>
-      <span class="label">Pulsar_X → X renames</span>
-      <span class="note">The TurboModule prefix convention is gone. Methods just have their natural names.</span>
+      <span class="label">Pulsar_X → X 方法重命名</span>
+      <span class="note">TurboModule 的前缀约定不见了。方法名回到该有的样子。</span>
     </div>
   </div>
 
-  <!-- Second row: three supporting metrics -->
   <div class="metric-grid reveal" style="margin-top: 18px;">
     <div class="metric-compact">
       <span class="num ok">0</span>
-      <span class="label">Native SDK lines changed</span>
-      <span class="note">Swift &amp; Kotlin source-mirrored via <code class="inline">deps/Pulsar/</code> and Gradle <code class="inline">sourceSets</code>.</span>
+      <span class="label">原生 SDK 改动行数</span>
+      <span class="note">Swift 与 Kotlin 源码通过 <code class="inline">deps/Pulsar/</code> 与 Gradle <code class="inline">sourceSets</code> 镜像引入。</span>
     </div>
     <div class="metric-compact">
       <span class="num">7</span>
-      <span class="label">TS files in lynx-pulsar/src/</span>
-      <span class="note">Down from 9 in RN; <code class="inline">useSharableState</code> and <code class="inline">useAdaptiveHaptics</code> are no longer needed.</span>
+      <span class="label">lynx-pulsar/src/ 的 TS 文件数</span>
+      <span class="note">RN 里有 9 个；<code class="inline">useSharableState</code> 和 <code class="inline">useAdaptiveHaptics</code> 直接不再需要。</span>
     </div>
     <div class="metric-compact">
       <span class="num accent">1,349</span>
-      <span class="label">Lines in App.tsx</span>
-      <span class="note">All components in one file. Sidesteps ReactLynx's multi-file snapshot crashes.</span>
+      <span class="label">App.tsx 总行数</span>
+      <span class="note">所有组件塞到一个文件里。绕开 ReactLynx 多文件下的 snapshot 崩溃。</span>
     </div>
   </div>
 
   <p class="reveal" style="margin-top:28px; max-width: 920px; color: var(--sub);">
-    The <code class="inline">Presets.ts</code> file, the flat map of 151 named presets, is essentially the same file
-    in both ports. Same nested namespace shape, same string literals to the native side. That's
-    <strong>1,368 lines of pure config</strong> the slopfork carried across untouched.</p>
+    <code class="inline">Presets.ts</code> 是一张 151 条命名预设的扁平表，两套移植里几乎是同一个文件：嵌套命名空间结构相同，
+    传给 native 的字符串字面量也相同。这就是 <strong>1,368 行纯配置</strong>，slopfork 原样搬过去。</p>
 </section>
 
 <!-- =========================================================
-     7. THE DIFF
+     6. THE DIFF
 ========================================================= -->
 <section id="s6" class="slide" data-num="06 / 08">
-  <p class="eyebrow reveal">The shape of the edit</p>
-  <h2 class="reveal">Same hook. Two worlds.</h2>
-  <p class="lede reveal" style="max-width:900px;"><code class="inline">usePatternComposer</code>, the hook a Pulsar app uses
-  to parse and play a pattern, written once for React Native, once for Lynx. The structure is identical.
-  The differences are mechanical.</p>
+  <p class="eyebrow reveal">改动的形状</p>
+  <h2 class="reveal">同一个 hook，两个世界。</h2>
+  <p class="lede reveal" style="max-width:900px;"><code class="inline">usePatternComposer</code> 是 Pulsar App 用来解析、播放 pattern 的 hook；
+  在 React Native 写一遍，在 Lynx 又写一遍。结构完全一致，差异都是机械性的。</p>
 
   <div class="diff-pair reveal" style="margin-top: 32px;">
     <div class="diff-pair-col">
@@ -1125,12 +1029,10 @@ html.js .reveal.in { opacity: 1; transform: none; }
     </div>
   </div>
   <p class="reveal" style="margin-top: 24px; color: var(--sub); max-width: 900px;">
-    <strong>Net result:</strong> import path, the worklet directive, and the
-    method-name prefix are gone. The shared-mutable-state primitive becomes a
-    plain <code class="inline">useRef</code>. Lynx's dual-thread model already
-    runs hooks on the background thread, so there's no shared-memory hop to bridge.</p>
+    <strong>净效果：</strong>import 路径、worklet 指令、方法名前缀全部消失。共享可变状态原语降级成一个普通的
+    <code class="inline">useRef</code>。Lynx 的双线程模型本就把 hook 跑在后台线程，不需要任何跨内存桥接。</p>
 
-  <p class="mini-compare-label reveal"><span class="num">2</span>Presets: drop the worklet and the method prefix</p>
+  <p class="mini-compare-label reveal"><span class="num">2</span>预设：去掉 worklet 与方法名前缀</p>
   <div class="mini-compare reveal">
     <div>
       <p class="code-title"><span class="badge rn">RN</span> Presets.ts</p>
@@ -1154,17 +1056,17 @@ html.js .reveal.in { opacity: 1; transform: none; }
     </div>
   </div>
 
-  <p class="mini-compare-label reveal"><span class="num">3</span>JSX primitives change; events use <code class="inline" style="font-size:14px;">bindtap</code></p>
+  <p class="mini-compare-label reveal"><span class="num">3</span>JSX 元素换名；事件改为 <code class="inline" style="font-size:14px;">bindtap</code></p>
   <div class="mini-compare reveal">
     <div>
-      <p class="code-title"><span class="badge rn">RN</span> PulsarApp tab bar</p>
+      <p class="code-title"><span class="badge rn">RN</span> PulsarApp 底部 tab 栏</p>
 <pre class="code"><span class="k">&lt;Pressable</span> onPress={() =&gt; setTab(<span class="s">'home'</span>)}<span class="k">&gt;</span>
   <span class="k">&lt;Image</span> source={iconHome} <span class="k">/&gt;</span>
   <span class="k">&lt;Text&gt;</span>Home<span class="k">&lt;/Text&gt;</span>
 <span class="k">&lt;/Pressable&gt;</span></pre>
     </div>
     <div>
-      <p class="code-title"><span class="badge lynx">Lynx</span> App.tsx tab bar</p>
+      <p class="code-title"><span class="badge lynx">Lynx</span> App.tsx 底部 tab 栏</p>
 <pre class="code"><span class="k">&lt;</span><span class="hi">view</span> className=<span class="s">"tab"</span> <span class="hi">bindtap</span>={handleTabHome}<span class="k">&gt;</span>
   <span class="k">&lt;</span><span class="hi">image</span> src={iconHomeActive}
          style={{ width:<span class="s">"24px"</span>, height:<span class="s">"24px"</span> }} <span class="k">/&gt;</span>
@@ -1175,93 +1077,85 @@ html.js .reveal.in { opacity: 1; transform: none; }
 </section>
 
 <!-- =========================================================
-     8. WHERE LYNX DIFFERS
+     7. WHERE LYNX DIFFERS
 ========================================================= -->
 <section id="s7" class="slide" data-num="07 / 08">
-  <p class="eyebrow reveal">ReactLynx · the not-so-mechanical parts</p>
-  <h2 class="reveal">Where Lynx <em>actually</em> differs.</h2>
-  <p class="lede reveal" style="max-width: 900px;">The adapter port is mechanical. The UI port is not.
-  ReactLynx looks like React but enforces a different runtime contract. And the things that
-  break first are the things React idioms make you reach for first.</p>
+  <p class="eyebrow reveal">ReactLynx · 不那么机械的部分</p>
+  <h2 class="reveal">Lynx <em>真正</em> 不同的地方。</h2>
+  <p class="lede reveal" style="max-width: 900px;">适配层的移植是机械活儿，UI 的移植不是。
+  ReactLynx 长得像 React，但运行时契约不一样。最先翻车的，往往是 React 写法里你第一反应就会用的那些东西。</p>
 
   <div class="diff-list reveal" style="margin-top: 28px;">
     <div class="diff-item warn">
-      <div class="heading">No conditional JSX</div>
-      <div class="body"><code>{cond && &lt;X/&gt;}</code> and ternaries <strong>crash the dual-thread snapshot system</strong>.
-      Render both branches, toggle <code>style={{ display: ... }}</code>. Every tab panel and every
-      demo sub-view in this app exists in the tree at all times.</div>
+      <div class="heading">不能用条件 JSX</div>
+      <div class="body"><code>{cond && &lt;X/&gt;}</code> 和三目都会 <strong>把双线程 snapshot 系统打崩</strong>。
+      正确写法是两个分支都渲染，用 <code>style={{ display: ... }}</code> 切换。这个 App 里每个 tab 面板、每个
+      demo 子页都常驻在树上。</div>
     </div>
     <div class="diff-item warn">
-      <div class="heading"><code style="font-family:var(--mono);font-size:14px;background:none;color:inherit;padding:0;">display: none</code> isn't enough</div>
-      <div class="body">In a flex container, <code>display: none</code> doesn't reliably hide a child.
-      The working pattern is <code>position: absolute</code> + <code>width/height: 100%</code> + <code>zIndex</code>,
-      with <code>overflow: hidden</code> on the parent.</div>
+      <div class="heading"><code style="font-family:var(--mono);font-size:14px;background:none;color:inherit;padding:0;">display: none</code> 不够</div>
+      <div class="body">flex 容器里的 <code>display: none</code> 并不能稳定隐藏子节点。
+      可靠的做法是 <code>position: absolute</code> + <code>width/height: 100%</code> + <code>zIndex</code>，
+      父节点配 <code>overflow: hidden</code>。</div>
     </div>
     <div class="diff-item warn">
-      <div class="heading">No <code style="font-family:var(--mono);font-size:14px;background:none;color:inherit;padding:0;">.map()</code> with dynamic keys</div>
-      <div class="body">Using <code>key</code> to force remount, or toggling <code>display:none</code> inside
-      <code>.map()</code>, both trigger <code>snapshotPatchApply</code> / <code>insertBefore</code> crashes.
-      Use <code>opacity</code> + absolute positioning inside lists.</div>
+      <div class="heading">不能在 <code style="font-family:var(--mono);font-size:14px;background:none;color:inherit;padding:0;">.map()</code> 里用动态 key</div>
+      <div class="body">用 <code>key</code> 强制重挂、或者在 <code>.map()</code> 里切 <code>display:none</code>，
+      都会触发 <code>snapshotPatchApply</code> / <code>insertBefore</code> 崩溃。列表内部用 <code>opacity</code>
+      加绝对定位代替。</div>
     </div>
     <div class="diff-item">
-      <div class="heading">Elements + events</div>
-      <div class="body"><code>&lt;View&gt;</code> → <code>&lt;view&gt;</code>, <code>&lt;Text&gt;</code> → <code>&lt;text&gt;</code>,
-      <code>onPress</code> → <code>bindtap</code>, <code>onTouchStart</code> → <code>bindtouchstart</code>.
-      Text MUST be inside a <code>&lt;text&gt;</code>; bare strings in views are a build error.</div>
+      <div class="heading">元素与事件</div>
+      <div class="body"><code>&lt;View&gt;</code> → <code>&lt;view&gt;</code>，<code>&lt;Text&gt;</code> → <code>&lt;text&gt;</code>，
+      <code>onPress</code> → <code>bindtap</code>，<code>onTouchStart</code> → <code>bindtouchstart</code>。
+      文字必须放进 <code>&lt;text&gt;</code>；view 里裸的字符串会编译报错。</div>
     </div>
     <div class="diff-item">
-      <div class="heading">CSS reality check</div>
-      <div class="body"><code>text-transform</code> isn't supported. All lengths need units (<code>"24px"</code>, not <code>24</code>).
-      <code>display: flex</code> defaults to <strong>row</strong>. <code>overflow: scroll</code> is unsupported;
-      use <code>&lt;scroll-view scroll-y&gt;</code>. <code>&lt;image&gt;</code> needs explicit pixel dimensions.</div>
+      <div class="heading">CSS 现实</div>
+      <div class="body"><code>text-transform</code> 不支持。长度必须带单位（<code>"24px"</code>，不是 <code>24</code>）。
+      <code>display: flex</code> 默认方向是 <strong>row</strong>。<code>overflow: scroll</code> 不支持；
+      用 <code>&lt;scroll-view scroll-y&gt;</code>。<code>&lt;image&gt;</code> 必须给明确的像素尺寸。</div>
     </div>
     <div class="diff-item warn">
-      <div class="heading">No gesture-handler</div>
-      <div class="body">The Playground's swipe-to-draw and the Slider demo were rebuilt on raw
-      <code>bindtouchstart/move/end</code>. The Sensor Haptics demo's accelerometer-driven dot lost its accelerometer entirely
-      (no API yet), so fell back to touch drag with the original physics intact.</div>
+      <div class="heading">没有 gesture-handler</div>
+      <div class="body">Playground 里的滑动绘制和 Slider demo，都是用裸 <code>bindtouchstart/move/end</code> 重写的。
+      Sensor Haptics demo 那个加速度计驱动的小球，因为没有可用的传感器 API，最后退回成触控拖拽，物理参数保持不变。</div>
     </div>
     <div class="diff-item good">
-      <div class="heading">Dual-thread guard for NativeModules</div>
-      <div class="body"><code>NativeModules</code> only exists on the <em>background</em> thread. The main thread evaluates
-      JSX snapshots. The adapter wraps with <code>typeof NativeModules !== 'undefined'</code> so the module file is
-      safe to import on both threads.</div>
+      <div class="heading">NativeModules 的双线程保护</div>
+      <div class="body"><code>NativeModules</code> 只在 <em>后台线程</em> 存在；主线程负责求值 JSX snapshot。适配层用
+      <code>typeof NativeModules !== 'undefined'</code> 包一下，让模块文件在两条线程上都能安全 import。</div>
     </div>
   </div>
 </section>
 
 <!-- =========================================================
-     (DROPPED: old slides 9 UI port, 10 Harness pillars)
-========================================================= -->
-<!-- =========================================================
-     8. SLOPFORK RECIPE: closer (dark navy visual from old s12)
+     8. SLOPFORK RECIPE
 ========================================================= -->
 <section id="s8" class="slide end" data-num="08 / 08">
-  <p class="eyebrow reveal">Repeatable</p>
-  <h2 class="reveal">The <em>slopfork</em> recipe.</h2>
-  <p class="lede reveal" style="max-width: 940px;">For the next port, Reanimated, Skia, Gesture Handler,
-  anything with a Native Module shape, here's the order that worked.</p>
+  <p class="eyebrow reveal">可复用</p>
+  <h2 class="reveal"><em>Slopfork</em> 配方。</h2>
+  <p class="lede reveal" style="max-width: 940px;">下一次移植 (Reanimated、Skia、Gesture Handler，
+  或任何长着 Native Module 形状的库) 沿用这套顺序就好。</p>
 
   <ol class="recipe reveal">
-    <li><strong>Adapter first, UI later.</strong> Lock the TS surface against a <code>test-sync-returns/</code> harness before touching any view code.</li>
-    <li><strong>Minimal demo before polished one.</strong> A throwaway test app exercises every API call; the polished port falls back to it when ReactLynx breaks.</li>
-    <li><strong>Codify constraints in AGENTS.md.</strong> "No conditional JSX," "single file," "scroll-view not overflow": written down, routed from CLAUDE.md, linked from each PRD.</li>
-    <li><strong>One PRD per unit of work, with a Verification Protocol.</strong> lynx-docs lookup → <code>npm run build</code> → DevTool screenshot → console-error check. Every story.</li>
-    <li><strong>Compile-passing is not done.</strong> End-to-end verify on device before claiming a story green.</li>
+    <li><strong>先 adapter，后 UI。</strong>用 <code>test-sync-returns/</code> 这种 harness 把 TS 表面锁住，再去碰任何 view 代码。</li>
+    <li><strong>先做最小 demo，再做完整版。</strong>一个一次性的测试 App 把每一条 API 调用都跑一遍；完整移植在 ReactLynx 翻车时，可以退回最小 demo 排查。</li>
+    <li><strong>把约束写进 AGENTS.md。</strong>"不要条件 JSX"、"单文件"、"用 scroll-view 不要用 overflow"，全部白纸黑字写下，从 CLAUDE.md 路由进来，每篇 PRD 都链回去。</li>
+    <li><strong>每一个工作单元一篇 PRD，附 Verification Protocol。</strong>lynx-docs 查询 → <code>npm run build</code> → DevTool 截图 → console error 检查。每一个 story 都走一遍。</li>
+    <li><strong>编译通过不等于完工。</strong>必须端到端在真机上验证，才能宣称一个 story 是绿的。</li>
   </ol>
 
   <div class="bigquote reveal">
-    <p>"Compile-passing &ne; working. Verify end-to-end."</p>
-    <cite>global CLAUDE.md, principle #4</cite>
+    <p>"编译通过 &ne; 能用。必须端到端验证。"</p>
+    <cite>全局 CLAUDE.md，原则 #4</cite>
   </div>
 
   <p class="byline reveal" style="margin-top: 40px;">Hux · ByteDance Lynx · 2026</p>
 </section>
 
 <!-- ==========================================================
-     Preset playback (slide 3): WebAudio + scrolling indicator.
-     Patterns are the verbatim JSON from pulsar/docs landing page;
-     synthesis logic is a vanilla-JS port of AudioPatternUtility.
+     Preset playback: WebAudio + scrolling indicator.
      ========================================================== -->
 <script>
 const PRESET_PATTERNS = {
@@ -1461,7 +1355,6 @@ class AudioPatternUtility {
   }
 }
 
-// One audio engine, one card playing at a time.
 (function wirePresetPlay() {
   const cards = document.querySelectorAll(".preset-card[data-preset]");
   if (cards.length === 0) return;
@@ -1481,7 +1374,7 @@ class AudioPatternUtility {
       const eng = engines.get(activeCard);
       if (eng) eng.stop();
       const ind = activeCard.querySelector(".preset-indicator");
-      if (ind) ind.style.left = "12px"; // reset to padding edge
+      if (ind) ind.style.left = "12px";
       setActive(activeCard, false);
       activeCard = null;
     }
@@ -1492,7 +1385,7 @@ class AudioPatternUtility {
     const viz = card.querySelector(".preset-viz");
     const img = viz.querySelector("img");
     let startTs = null;
-    const baseLeft = 12; // matches preset-viz padding
+    const baseLeft = 12;
     function step(ts) {
       if (!startTs) startTs = ts;
       const elapsed = ts - startTs;
@@ -1502,7 +1395,6 @@ class AudioPatternUtility {
       if (progress < 1 && activeCard === card) {
         activeFrame = requestAnimationFrame(step);
       } else {
-        // animation done; stop will be called on audio end
         activeFrame = null;
       }
     }
@@ -1516,12 +1408,10 @@ class AudioPatternUtility {
     if (!pattern || !btn) return;
 
     btn.addEventListener("click", async () => {
-      // If this card is playing, stop.
       if (activeCard === card) {
         stopActive();
         return;
       }
-      // Otherwise stop any other and start this one.
       stopActive();
       let engine = engines.get(card);
       if (!engine) {
@@ -1529,13 +1419,11 @@ class AudioPatternUtility {
         engines.set(card, engine);
       }
       try {
-        // Re-parse every time (cheap, and avoids context invalidation on tab-away).
         await engine.parsePattern(pattern);
         activeCard = card;
         setActive(card, true);
         startIndicator(card, pattern.duration);
         await engine.play();
-        // play() resolves on onended
         if (activeCard === card) stopActive();
       } catch (err) {
         console.error("[preset]", err);
@@ -1547,12 +1435,10 @@ class AudioPatternUtility {
 </script>
 <script>
 document.documentElement.classList.add("js");
-// preserve hash when toggling languages
 (function () {
   const other = document.getElementById("lang-other");
   if (other) other.href = other.getAttribute("href") + location.hash;
 })();
-// reveal on scroll
 const io = new IntersectionObserver((entries) => {
   for (const e of entries) {
     if (e.isIntersecting) e.target.classList.add("in");
@@ -1560,7 +1446,6 @@ const io = new IntersectionObserver((entries) => {
 }, { threshold: 0.15 });
 document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 
-// keyboard nav
 const slides = [...document.querySelectorAll("section.slide")];
 let current = 0;
 function go(delta) {
@@ -1574,7 +1459,6 @@ addEventListener("keydown", (e) => {
   else if (e.key === "End") { current = slides.length - 1; slides[current].scrollIntoView(); }
 });
 
-// track current
 const oio = new IntersectionObserver((entries) => {
   for (const e of entries) {
     if (e.isIntersecting && e.intersectionRatio > 0.5) {
