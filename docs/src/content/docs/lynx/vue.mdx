@@ -1,0 +1,212 @@
+---
+title: Vue Lynx port
+description: The Pulsar demo on Vue Lynx — a Vue 3 port at parity with the ReactLynx app, sharing the same native module, SDK, and UI.
+---
+
+import { CardGrid, LinkCard, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+import { BASE_PATH } from '../../../../config';
+
+The Lynx Pulsar demo ships in **two flavours that render identically**:
+
+- **`lynx-pulsar-app`** — the [ReactLynx](https://lynxjs.org) port (the original).
+- **`lynx-pulsar-vue`** — the [Vue Lynx](https://vue.lynxjs.org) port, written with Vue 3's Composition API and Single-File Components.
+
+Both are ports of the official Pulsar demo app and are **visually and behaviourally at parity** — same Presets / Playground / Demos tabs, same 151 presets, same design system. They differ only in the framework layer. This page documents what the Vue port changes and, just as importantly, **what it leaves untouched**.
+
+## What's shared vs. Vue-specific
+
+Everything below the component layer is **common to both ports** — the Vue port reuses it verbatim.
+
+| Layer | ReactLynx (`lynx-pulsar-app`) | Vue Lynx (`lynx-pulsar-vue`) | Shared? |
+|---|---|---|---|
+| Native module (`PulsarLynxModule`, Swift SDK, Core Haptics) | — | — | ✅ identical |
+| iOS host + bundle pipeline (`.lynx` build, `local://` loading) | — | — | ✅ identical |
+| `Presets` / `Settings` (151 presets, system feedback, support level) | `lynx-pulsar` | `lynx-pulsar` | ✅ same package |
+| `App.css` (≈990 lines, design system) | source | copied **verbatim** | ✅ identical |
+| `presetData.ts`, `presetImages.ts`, preset PNGs, tab icons | source | copied **verbatim** | ✅ identical |
+| Self-contained-assets config (`dataUriLimit`) | `lynx.config.ts` | `lynx.config.ts` | ✅ same strategy |
+| Component model | React function component | `.vue` SFC, `<script setup>` | ⚠️ Vue-specific |
+| State & effects | `useState` / `useRef` / `useEffect` | `ref` / plain vars / `onMounted` | ⚠️ Vue-specific |
+| Pattern composer | `usePatternComposer()` hook | `createPatternComposer()` closure | ⚠️ Vue-specific |
+| Templating & events | JSX + `bindtap` / `bindinput` | template + `@tap` / `@input` | ⚠️ Vue-specific |
+| Build toolchain | `react-rsbuild-plugin` | `vue-lynx` + `@rsbuild/plugin-vue` | ⚠️ Vue-specific |
+
+The rule of thumb: **the SDK, the native side, the styling, and the data are the same**. Only the framework idioms change.
+
+## Try it
+
+```bash
+git clone https://github.com/Huxpro/pulsar.git
+cd pulsar
+( cd lynx/lynx-pulsar      && npm install )
+( cd lynx/lynx-pulsar-vue  && npm install )
+
+cd lynx/lynx-pulsar-vue && npm run dev   # rspeedy dev — scan the QR in LynxExplorer
+```
+
+The native host is the **same** [Lynx Pulsar host](/pulsar/lynx/architecture/) used by the ReactLynx app — point it at the Vue dev-server URL (or swap the bundled `.lynx` file) and it just works, because the module registration and Core Haptics path are unchanged.
+
+## Project setup
+
+The project was scaffolded from the official template and then wired to the shared `lynx-pulsar` adapter:
+
+```bash
+npm create vue-lynx@latest      # official Vue Lynx scaffolder (create-vue-lynx, TS template)
+```
+
+Two files carry all the framework wiring:
+
+```ts
+// lynx.config.ts
+import { defineConfig } from '@lynx-js/rspeedy'
+import { pluginQRCode } from '@lynx-js/qrcode-rsbuild-plugin'
+import { pluginVueLynx } from 'vue-lynx/plugin'
+
+export default defineConfig({
+  environments: { lynx: {}, web: {} },
+  plugins: [
+    pluginQRCode({ schema: (url) => `${url}?fullscreen=true` }),
+    pluginVueLynx({ optionsApi: false, enableCSSInlineVariables: true, enableCSSInheritance: true }),
+  ],
+  // Same self-contained-assets trick as the ReactLynx app — inline every preset PNG.
+  output: { dataUriLimit: { image: Number.MAX_SAFE_INTEGER } },
+})
+```
+
+```ts
+// src/index.ts  — Vue mounts an app instance instead of ReactLynx's root.render()
+import { createApp } from 'vue-lynx'
+import App from './App.vue'
+
+createApp(App).mount()
+```
+
+<Aside type="caution" title="Version pinning: Vue Lynx needs Rsbuild v1">
+`vue-lynx@0.4.0` is built against **Rsbuild v1** (`@rsbuild/core ^1.0.0`, `@rsbuild/plugin-vue ^1.2.6`). The latest `@lynx-js/rspeedy@0.15` ships **Rsbuild v2**, which fails the build with *"Rspeedy manages the SWC compilation target via `env`, which is mutually exclusive with `jsc.target`"*. Pin the Rsbuild-v1 toolchain:
+
+| Package | Version |
+|---|---|
+| `vue` | `^3.5.38` |
+| `vue-lynx` | `^0.4.0` |
+| `@lynx-js/rspeedy` | `0.14.5` (last 0.14.x — Rsbuild 1.7.5) |
+| `@lynx-js/qrcode-rsbuild-plugin` | `0.4.7` |
+| `@rsbuild/plugin-vue` | `^1.2.6` |
+</Aside>
+
+## Using the SDK
+
+`Presets` and `Settings` come straight from `lynx-pulsar` — **the same API documented on the [SDK reference](/pulsar/sdk/lynx/)**. Only the call site syntax changes.
+
+<Tabs>
+  <TabItem label="Vue Lynx">
+```vue
+<script setup lang="ts">
+import { Presets } from './pulsar'   // re-exports lynx-pulsar's Presets/Settings
+</script>
+
+<template>
+  <view @tap="Presets.dogBark()">
+    <text>Bark</text>
+  </view>
+</template>
+```
+  </TabItem>
+  <TabItem label="ReactLynx">
+```tsx
+import { Presets } from 'lynx-pulsar';
+
+<view bindtap={() => Presets.dogBark()}>
+  <text>Bark</text>
+</view>
+```
+  </TabItem>
+</Tabs>
+
+### Pattern composer
+
+The ReactLynx adapter exposes `usePatternComposer()` — a hook backed by `useRef`/`useEffect`. Vue's `setup()` runs **once** per component instance, so the Vue port replaces the hook with a plain `createPatternComposer()` closure (same `{ parse, play, stop, isParsed }` surface, no render-tied cleanup). Parse patterns in `onMounted`, play from handlers.
+
+<Tabs>
+  <TabItem label="Vue Lynx">
+```ts
+import { createPatternComposer } from './pulsar'
+
+const tap = createPatternComposer()
+onMounted(() => tap.parse({ discretePattern: [{ time: 0, amplitude: 1, frequency: 1 }], continuousPattern: { amplitude: [], frequency: [] } }))
+// in a handler:
+tap.play()
+```
+  </TabItem>
+  <TabItem label="ReactLynx">
+```tsx
+import { usePatternComposer } from 'lynx-pulsar';
+
+const tap = usePatternComposer();
+useEffect(() => { tap.parse(pattern); }, []);
+// in a handler:
+tap.play();
+```
+  </TabItem>
+</Tabs>
+
+<Aside type="note" title="Null-safe native access">
+On hosts without the background-thread native module (the web preview, or before the bridge is ready), the Vue port's `pulsar.ts` falls back to a **null-safe stub** so `onMounted` calls no-op instead of throwing. On device the real `NativeModules.PulsarModule` is used. ReactLynx sidesteps this implicitly because its calls run in `useEffect` after first paint.
+</Aside>
+
+## ReactLynx → Vue mapping
+
+The mechanical translation, for porting screens yourself:
+
+| ReactLynx | Vue Lynx |
+|---|---|
+| `root.render(<App/>)` | `createApp(App).mount()` |
+| `useState(x)` → `[v, setV]` | `ref(x)`, read/write `.value` |
+| `useRef(x)` (persist, no re-render) | **plain `let`/`const`** — `setup()` runs once |
+| `useEffect(fn, [])` | `onMounted(fn)` |
+| derived value | `computed(() => …)` |
+| `bindtap` / `onClick` | `@tap` |
+| `bindtouchstart/move/end` | `@touchstart/@touchmove/@touchend` |
+| `bindinput={e => …e.detail.value}` | `@input="e => …e.detail.value"` (or `v-model`) |
+| `bindlayoutchange` | `@layoutchange` |
+| `{a ? <X/> : null}` / `{cond && <X/>}` | `v-if` / `v-show` |
+| `arr.map(x => <X/>)` | `v-for="x in arr" :key="…"` |
+| `className={'a ' + (b ? 'c' : '')}` | `class="a" :class="{ c: b }"` |
+| `style={{ marginTop: '8px' }}` | `:style="{ marginTop: '8px' }"` |
+| imports from `@lynx-js/react` | imports from `vue-lynx` |
+
+The Lynx elements (`<view>`, `<text>`, `<image>`, `<scroll-view>`, `<input>`) and the `display: flex/none` tab-toggling pattern are **identical** across both — they're Lynx primitives, not framework features.
+
+## Parity status
+
+The Presets, Playground, and Demos tabs are fully ported. Rendering was verified against the ReactLynx app via the Rspeedy **web preview** (both apps expose a `main.web.bundle`): the presets page is **pixel-identical**, search filtering (`@input` → `e.detail.value` → computed → re-render) and tab switching (`@tap`) behave the same, and the Vue app now mounts with no runtime errors.
+
+The same platform caveats as the ReactLynx demo apply — see [How it works](/pulsar/lynx/architecture/):
+
+- **No Home tab** — device↔browser pairing needs WebSocket, which Lynx doesn't expose yet. The full UI + connection logic is ported but hidden in the tab bar.
+- **Sensor demo** uses a touch fallback — no accelerometer API in Lynx.
+
+## Where to go next
+
+<CardGrid>
+  <LinkCard
+    title="SDK reference"
+    href={`${BASE_PATH}/sdk/lynx/`}
+    description="Presets, pattern composer, realtime composer — the shared lynx-pulsar API both ports call into."
+  />
+  <LinkCard
+    title="How it works"
+    href={`${BASE_PATH}/lynx/architecture/`}
+    description="The native module, host shell, and bundle pipeline — common to the ReactLynx and Vue ports alike."
+  />
+  <LinkCard
+    title="Get started"
+    href={`${BASE_PATH}/lynx/overview/`}
+    description="The ReactLynx demo and a one-minute tour of what Lynx Pulsar gives your app."
+  />
+  <LinkCard
+    title="Vue Lynx docs ↗"
+    href="https://vue.lynxjs.org"
+    target="_blank"
+    description="The upstream Vue Lynx framework — Composition API, SFCs, and the create-vue-lynx scaffolder."
+  />
+</CardGrid>

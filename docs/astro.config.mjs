@@ -39,6 +39,7 @@ export default defineConfig({
             { label: 'SDK reference', slug: 'sdk/lynx' },
             { label: 'Run the demo', slug: 'lynx/build-prompt' },
             { label: 'How it works', slug: 'lynx/architecture' },
+            { label: 'Vue Lynx port', slug: 'lynx/vue' },
           ],
         },
         {
