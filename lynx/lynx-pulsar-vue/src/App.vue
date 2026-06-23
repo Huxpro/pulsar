@@ -292,9 +292,15 @@ const selectedTags = ref<string[]>([])
 const supportLevel = ref('Unknown')
 
 onMounted(() => {
-  const level = Settings.getHapticsSupportLevel()
-  const labels: Record<number, string> = { 0: 'None', 2: 'Limited', 3: 'Standard', 4: 'Advanced' }
-  supportLevel.value = labels[level] || 'Unknown'
+  // Native module is background-thread-only and absent on the web preview; keep
+  // the default "Unknown" rather than letting the call throw during mount.
+  try {
+    const level = Settings.getHapticsSupportLevel()
+    const labels: Record<number, string> = { 0: 'None', 2: 'Limited', 3: 'Standard', 4: 'Advanced' }
+    supportLevel.value = labels[level] || 'Unknown'
+  } catch {
+    supportLevel.value = 'Unknown'
+  }
 })
 
 // Tag groups — AND across groups, OR within each group

@@ -27,9 +27,23 @@ interface PulsarModule {
 // runtime. Event handlers and lifecycle hooks (where we call these) run there.
 declare const NativeModules: { PulsarModule: PulsarModule } | undefined
 
+const nativeModule =
+  (typeof NativeModules !== 'undefined' && (NativeModules as { PulsarModule?: PulsarModule })?.PulsarModule) || null
+
+// On hosts without the native module (the web preview, or before the background
+// thread is ready) fall back to a null-safe stub so calls no-op instead of
+// throwing and surfacing a "loadCard failed" error during mount. On device the
+// real module is used. `parsePattern` returns -1 so composers report unparsed.
 const Pulsar: PulsarModule =
-  (typeof NativeModules !== 'undefined' && (NativeModules as { PulsarModule?: PulsarModule })?.PulsarModule) ||
-  ({} as PulsarModule)
+  nativeModule ||
+  (new Proxy(
+    {},
+    {
+      get(_target, prop: string) {
+        return (..._args: unknown[]) => (prop === 'parsePattern' ? -1 : undefined)
+      },
+    },
+  ) as PulsarModule)
 
 /**
  * Framework-agnostic replacement for the ReactLynx `usePatternComposer` hook.
