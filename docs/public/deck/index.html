@@ -1183,28 +1183,10 @@ html.js .reveal.in { opacity: 1; transform: none; }
   <p class="eyebrow reveal">ReactLynx · the not-so-mechanical parts</p>
   <h2 class="reveal">Where Lynx <em>actually</em> differs.</h2>
   <p class="lede reveal" style="max-width: 900px;">The adapter port is mechanical. The UI port is not.
-  ReactLynx looks like React but enforces a different runtime contract. And the things that
-  break first are the things React idioms make you reach for first.</p>
+  ReactLynx looks like React but ships its own primitives, its own CSS subset, and its own
+  threading model. These are the differences you actually trip over.</p>
 
   <div class="diff-list reveal" style="margin-top: 28px;">
-    <div class="diff-item warn">
-      <div class="heading">No conditional JSX</div>
-      <div class="body"><code>{cond && &lt;X/&gt;}</code> and ternaries <strong>crash the dual-thread snapshot system</strong>.
-      Render both branches, toggle <code>style={{ display: ... }}</code>. Every tab panel and every
-      demo sub-view in this app exists in the tree at all times.</div>
-    </div>
-    <div class="diff-item warn">
-      <div class="heading"><code style="font-family:var(--mono);font-size:14px;background:none;color:inherit;padding:0;">display: none</code> isn't enough</div>
-      <div class="body">In a flex container, <code>display: none</code> doesn't reliably hide a child.
-      The working pattern is <code>position: absolute</code> + <code>width/height: 100%</code> + <code>zIndex</code>,
-      with <code>overflow: hidden</code> on the parent.</div>
-    </div>
-    <div class="diff-item warn">
-      <div class="heading">No <code style="font-family:var(--mono);font-size:14px;background:none;color:inherit;padding:0;">.map()</code> with dynamic keys</div>
-      <div class="body">Using <code>key</code> to force remount, or toggling <code>display:none</code> inside
-      <code>.map()</code>, both trigger <code>snapshotPatchApply</code> / <code>insertBefore</code> crashes.
-      Use <code>opacity</code> + absolute positioning inside lists.</div>
-    </div>
     <div class="diff-item">
       <div class="heading">Elements + events</div>
       <div class="body"><code>&lt;View&gt;</code> → <code>&lt;view&gt;</code>, <code>&lt;Text&gt;</code> → <code>&lt;text&gt;</code>,
