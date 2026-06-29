@@ -16,8 +16,9 @@ The path a tap takes from your Lynx code to a vibration on the device:
 │               ▼                                          │
 │  ┌──────────────────────────────────────────────────┐   │
 │  │ PulsarLynxModule (Obj-C, <LynxModule>)           │   │
-│  │   playPreset(name)                               │   │
-│  │   playPattern(events) / startRealtime(...)       │   │
+│  │   play(name)                                     │   │
+│  │   parsePattern(...) / patternPlay(id)            │   │
+│  │   realtimeSet(amp, freq) / realtimeStop()        │   │
 │  └────────────┬─────────────────────────────────────┘   │
 │               │                                          │
 │               ▼                                          │
@@ -32,11 +33,22 @@ The path a tap takes from your Lynx code to a vibration on the device:
 
 `lynx-pulsar` exports three things:
 
-- **`Presets`** — 151 preset functions plus `Presets.System.*` (system feedback styles). Each returns a `Promise<void>`.
-- **`usePatternComposer()`** — pattern composer hook. Queue discrete and continuous events, then `play()`.
-- **`useRealtimeComposer()`** — realtime composer hook. `start()` → `update({ intensity, sharpness })` at 60 Hz → `stop()`.
+- **`Presets`** — 151 preset functions plus `Presets.System.*` (system feedback styles). Each is a synchronous `void` call that posts a play command to the native module.
+- **`usePatternComposer(pattern?)`** — pattern composer hook. Supply a `Pattern` (`discretePattern` + `continuousPattern` envelopes); the hook parses it on mount and exposes `{ play, stop, parse, isParsed }`. Native resources release on unmount.
+- **`useRealtimeComposer()`** — realtime composer hook. Returns `{ set(amplitude, frequency), playDiscrete(amplitude, frequency), stop, isActive }`. Call `set` at touch-event rate to drive continuous haptics; the bridge debounces if backed up.
 
-The hooks are plain `useRef`-backed — Lynx uses a different threading model than React Native Reanimated, so the upstream `'worklet'` directives are not used here.
+The hooks are plain `useRef`-backed — Lynx uses a different threading model than React Native Reanimated, so the upstream `'worklet'` directives are not used here. The full API surface is on the [SDK reference](/pulsar/sdk/lynx/) page.
+
+## A note on threading
+
+ReactLynx runs your JSX on two threads: a **main thread** for synchronous snapshot evaluation, and a **background thread** for event handlers, effects, and most hooks. `NativeModules.PulsarModule` is only available on the background thread — calling a Pulsar API from main-thread evaluation will hit an undefined module and silently no-op.
+
+In practice this means:
+
+- ✅ **Safe** — call from `bindtap` / `bindtouch*` handlers, `useEffect`, async callbacks
+- ❌ **Unsafe** — call from a render expression top-level, a `static` initializer that runs at snapshot eval time
+
+The adapter guards `NativeModules` with a `typeof` check so main-thread evaluation doesn't throw; if your haptics simply don't fire, the call site likely ran on the wrong thread.
 
 ## The host
 

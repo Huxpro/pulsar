@@ -55,16 +55,6 @@ export default defineConfig({
               attrs: { target: '_blank', rel: 'noopener' },
             },
             {
-              label: 'iOS SDK ↗',
-              link: 'https://docs.swmansion.com/pulsar/sdk/ios',
-              attrs: { target: '_blank', rel: 'noopener' },
-            },
-            {
-              label: 'Android SDK ↗',
-              link: 'https://docs.swmansion.com/pulsar/sdk/android',
-              attrs: { target: '_blank', rel: 'noopener' },
-            },
-            {
               label: 'React Native SDK ↗',
               link: 'https://docs.swmansion.com/pulsar/sdk/react-native',
               attrs: { target: '_blank', rel: 'noopener' },

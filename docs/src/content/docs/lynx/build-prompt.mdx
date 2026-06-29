@@ -3,7 +3,9 @@ title: Run the demo
 description: Build the 151-preset Lynx Pulsar showcase app on your iOS Simulator or physical iPhone.
 ---
 
-A complete walkthrough — clone the repo, build the bundle, install the host, launch the app — for both targets. Total time on a fresh machine: ~30 min the first time (mostly Lynx C++ pods downloading), a few minutes after that.
+A complete walkthrough — clone the repo, build the bundle, install the host, launch the app — for both the iOS Simulator and a physical iPhone.
+
+**Time budget.** ~30 min the first time on a fresh machine (almost all of it is the initial `pod install` for Lynx's C++ pods like PrimJS — see the [host setup notes](https://github.com/Huxpro/pulsar/blob/lynx-port/lynx/AGENTS.md)). Once the host is set up, subsequent rebuilds take a few minutes — and rspeedy hot-reload during JS iteration is sub-second (see [Iterating during development](#iterating-during-development) below).
 
 ## Prerequisites
 
@@ -94,7 +96,7 @@ Tap the URL field in the host's home card → long-press → Paste → tap **Go*
 | Symptom | Cause / Fix |
 |---|---|
 | `xcrun simctl install` errors with "no devices booted" | Boot a simulator first via Simulator.app or `xcrun simctl boot`. |
-| Build fails at `Bundle Pulsar Lynx code` Run Script | Make sure your `Huxpro/pulsar` checkout is at `~/github/pulsar`, or set `LYNX_PULSAR_APP_DIR` in an Xcode user xcconfig. |
+| Build fails at `Bundle Pulsar Lynx code` Run Script | The Run Script copies `lynx-pulsar-app/dist/main.lynx.bundle` into the app's `Resource/` folder ([how it works](/pulsar/lynx/architecture/#the-bundle-pipeline)). Either keep your `Huxpro/pulsar` checkout at `~/github/pulsar`, or set `LYNX_PULSAR_APP_DIR` in an Xcode user xcconfig. |
 | Device install fails with "ApplicationVerificationFailed" | Indicates a code signature mismatch. Re-archive Release cleanly: `xcodebuild ... clean build`. |
 | `npm: command not found` during the build phase | Xcode strips `PATH`. The script prepends `/opt/homebrew/bin:/usr/local/bin`; edit if your `npm` lives elsewhere. |
 
