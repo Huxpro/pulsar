@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<title>Pulsar → Lynx · Slopfork 配方</title>
+<title>Pulsar → Lynx · 差异在哪里</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -741,13 +741,12 @@ html.js .reveal.in { opacity: 1; transform: none; }
   <a href="#s5" title="适配层移植"></a>
   <a href="#s6" title="代码差异"></a>
   <a href="#s7" title="Lynx 的差异点"></a>
-  <a href="#s8" title="Slopfork 配方"></a>
 </nav>
 
 <!-- =========================================================
      1. HERO
 ========================================================= -->
-<section id="s1" class="slide hero" data-num="01 / 08">
+<section id="s1" class="slide hero" data-num="01 / 07">
   <div class="hero-grid">
     <div class="reveal">
       <p class="eyebrow">一个黑客松故事 · 2026</p>
@@ -767,7 +766,7 @@ html.js .reveal.in { opacity: 1; transform: none; }
 <!-- =========================================================
      2. WHAT IS PULSAR
 ========================================================= -->
-<section id="s2" class="slide" data-num="02 / 08">
+<section id="s2" class="slide" data-num="02 / 07">
   <p class="eyebrow reveal">背景</p>
   <h2 class="reveal">什么是 <em>Pulsar？</em></h2>
   <p class="lede reveal" style="margin-top: 12px; max-width: 940px;">
@@ -791,7 +790,7 @@ html.js .reveal.in { opacity: 1; transform: none; }
 <!-- =========================================================
      3. PRESET CONCEPTS
 ========================================================= -->
-<section id="s3" class="slide" data-num="03 / 08">
+<section id="s3" class="slide" data-num="03 / 07">
   <p class="eyebrow reveal">预设可视化</p>
   <h2 class="reveal">一个触觉 <em>预设</em>，就是带包络的命名 pattern。</h2>
   <p class="lede reveal" style="max-width: 940px;">
@@ -853,7 +852,7 @@ html.js .reveal.in { opacity: 1; transform: none; }
 <!-- =========================================================
      4. THE STACK
 ========================================================= -->
-<section id="s4" class="slide" data-num="04 / 08">
+<section id="s4" class="slide" data-num="04 / 07">
   <p class="eyebrow reveal">架构</p>
   <h2 class="reveal">两套适配层，同一台引擎。</h2>
   <p class="lede reveal" style="margin-top: 8px;">底层 Swift 与 Kotlin Pulsar SDK 通过源码镜像同时进入两套适配层。
@@ -915,7 +914,7 @@ html.js .reveal.in { opacity: 1; transform: none; }
 <!-- =========================================================
      5. ADAPTER PORT NUMBERS
 ========================================================= -->
-<section id="s5" class="slide" data-num="05 / 08">
+<section id="s5" class="slide" data-num="05 / 07">
   <p class="eyebrow reveal">第 ② 层 · lynx-pulsar</p>
   <h2 class="reveal">~70% 直接复用，~20% 改写，~10% 全新。</h2>
   <p class="lede reveal">React Native 适配层的大部分 TS 表面 1:1 映射到 Lynx。
@@ -971,7 +970,7 @@ html.js .reveal.in { opacity: 1; transform: none; }
 <!-- =========================================================
      6. THE DIFF
 ========================================================= -->
-<section id="s6" class="slide" data-num="06 / 08">
+<section id="s6" class="slide" data-num="06 / 07">
   <p class="eyebrow reveal">改动的形状</p>
   <h2 class="reveal">同一个 hook，两个世界。</h2>
   <p class="lede reveal" style="max-width:900px;"><code class="inline">usePatternComposer</code> 是 Pulsar App 用来解析、播放 pattern 的 hook；
@@ -1081,31 +1080,14 @@ html.js .reveal.in { opacity: 1; transform: none; }
 <!-- =========================================================
      7. WHERE LYNX DIFFERS
 ========================================================= -->
-<section id="s7" class="slide" data-num="07 / 08">
+<section id="s7" class="slide end" data-num="07 / 07">
   <p class="eyebrow reveal">ReactLynx · 不那么机械的部分</p>
   <h2 class="reveal">Lynx <em>真正</em> 不同的地方。</h2>
   <p class="lede reveal" style="max-width: 900px;">适配层的移植是机械活儿，UI 的移植不是。
-  ReactLynx 长得像 React，但运行时契约不一样。最先翻车的，往往是 React 写法里你第一反应就会用的那些东西。</p>
+  ReactLynx 长得像 React，但它带着自己的元素、自己的 CSS 子集和自己的双线程模型。
+  这是你实际会绊倒的地方。</p>
 
   <div class="diff-list reveal" style="margin-top: 28px;">
-    <div class="diff-item warn">
-      <div class="heading">不能用条件 JSX</div>
-      <div class="body"><code>{cond && &lt;X/&gt;}</code> 和三目都会 <strong>把双线程 snapshot 系统打崩</strong>。
-      正确写法是两个分支都渲染，用 <code>style={{ display: ... }}</code> 切换。这个 App 里每个 tab 面板、每个
-      demo 子页都常驻在树上。</div>
-    </div>
-    <div class="diff-item warn">
-      <div class="heading"><code style="font-family:var(--mono);font-size:14px;background:none;color:inherit;padding:0;">display: none</code> 不够</div>
-      <div class="body">flex 容器里的 <code>display: none</code> 并不能稳定隐藏子节点。
-      可靠的做法是 <code>position: absolute</code> + <code>width/height: 100%</code> + <code>zIndex</code>，
-      父节点配 <code>overflow: hidden</code>。</div>
-    </div>
-    <div class="diff-item warn">
-      <div class="heading">不能在 <code style="font-family:var(--mono);font-size:14px;background:none;color:inherit;padding:0;">.map()</code> 里用动态 key</div>
-      <div class="body">用 <code>key</code> 强制重挂、或者在 <code>.map()</code> 里切 <code>display:none</code>，
-      都会触发 <code>snapshotPatchApply</code> / <code>insertBefore</code> 崩溃。列表内部用 <code>opacity</code>
-      加绝对定位代替。</div>
-    </div>
     <div class="diff-item">
       <div class="heading">元素与事件</div>
       <div class="body"><code>&lt;View&gt;</code> → <code>&lt;view&gt;</code>，<code>&lt;Text&gt;</code> → <code>&lt;text&gt;</code>，
@@ -1128,29 +1110,6 @@ html.js .reveal.in { opacity: 1; transform: none; }
       <div class="body"><code>NativeModules</code> 只在 <em>后台线程</em> 存在；主线程负责求值 JSX snapshot。适配层用
       <code>typeof NativeModules !== 'undefined'</code> 包一下，让模块文件在两条线程上都能安全 import。</div>
     </div>
-  </div>
-</section>
-
-<!-- =========================================================
-     8. SLOPFORK RECIPE
-========================================================= -->
-<section id="s8" class="slide end" data-num="08 / 08">
-  <p class="eyebrow reveal">可复用</p>
-  <h2 class="reveal"><em>Slopfork</em> 配方。</h2>
-  <p class="lede reveal" style="max-width: 940px;">下一次移植 (Reanimated、Skia、Gesture Handler，
-  或任何长着 Native Module 形状的库) 沿用这套顺序就好。</p>
-
-  <ol class="recipe reveal">
-    <li><strong>先 adapter，后 UI。</strong>用 <code>test-sync-returns/</code> 这种 harness 把 TS 表面锁住，再去碰任何 view 代码。</li>
-    <li><strong>先做最小 demo，再做完整版。</strong>一个一次性的测试 App 把每一条 API 调用都跑一遍；完整移植在 ReactLynx 翻车时，可以退回最小 demo 排查。</li>
-    <li><strong>把约束写进 AGENTS.md。</strong>"不要条件 JSX"、"单文件"、"用 scroll-view 不要用 overflow"，全部白纸黑字写下，从 CLAUDE.md 路由进来，每篇 PRD 都链回去。</li>
-    <li><strong>每一个工作单元一篇 PRD，附 Verification Protocol。</strong>lynx-docs 查询 → <code>npm run build</code> → DevTool 截图 → console error 检查。每一个 story 都走一遍。</li>
-    <li><strong>编译通过不等于完工。</strong>必须端到端在真机上验证，才能宣称一个 story 是绿的。</li>
-  </ol>
-
-  <div class="bigquote reveal">
-    <p>"编译通过 &ne; 能用。必须端到端验证。"</p>
-    <cite>全局 CLAUDE.md，原则 #4</cite>
   </div>
 
   <p class="byline reveal" style="margin-top: 40px;">Hux · ByteDance Lynx · 2026</p>
