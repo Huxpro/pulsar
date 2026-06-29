@@ -2,7 +2,7 @@
 
 A ReactLynx port of [Software Mansion's Pulsar](https://github.com/software-mansion/pulsar) haptics app. 151 hand-crafted haptic presets, a pattern composer, and a realtime composer — driven by the native iOS `CoreHaptics` SDK through a Lynx `NativeModule`.
 
-This directory (`lynx/lynx-pulsar-app/`) is the polished demo app. The sibling `lynx/lynx-pulsar/` is the Lynx adapter library it depends on, mirroring the React Native TurboModule shipped at `react-native/react-native-pulsar/`.
+This directory (`lynx/lynx-pulsar-app/`) is the polished demo app. The sibling `lynx/lynx-pulsar/` is the Lynx adapter library it depends on (published on npm as [`lynx-pulsar`](https://www.npmjs.com/package/lynx-pulsar)), mirroring the React Native TurboModule shipped at `react-native/react-native-pulsar/`. Inside this repo the demo uses a workspace `file:../lynx-pulsar` link for fast iteration; external consumers should `npm install lynx-pulsar`.
 
 The runtime host is **Lynx Pulsar** — our customized fork of the upstream `LynxExplorer.app` at `~/github/lynx-pulsar-explorer/`. It carries `PulsarLynxModule` (the native bridge), the Pulsar Swift SDK, the app's display name + icons, and a Release-only Xcode build phase that bakes the rspeedy bundle into `.app/Resource/homepage.lynx.bundle`. Release archives boot straight into Pulsar; Debug archives keep the original Lynx-Explorer "Bundle URL" home card for live reload against `rspeedy dev`.
 
@@ -166,7 +166,7 @@ pulsar/                                  # software-mansion/pulsar (this fork: h
 ├── PulsarApp/                           # upstream Expo app (the port source for App.tsx + icons)
 └── lynx/                                # this fork's additions
     ├── lynx-pulsar/                     # Lynx adapter library
-    ├── lynx-pulsar-demo/                # SDK harness (ports react-native/PulsarApp/)
+    ├── lynx-pulsar-demo/                # Pulsar Example (ports react-native/PulsarApp/)
     ├── lynx-pulsar-app/                 # ← you are here; ports PulsarApp/
     └── AGENTS.md                        # native-side knowledge base
 

@@ -10,29 +10,16 @@ Lynx Pulsar gives your [Lynx](https://lynxjs.org) app haptic feedback through a 
 
 ## Try it
 
-The fastest way to feel what it does is to install the demo on your iPhone:
+The fastest way to feel what it does is to install the demo on your iPhone. Get the JS side set up:
 
 ```bash
 git clone https://github.com/Huxpro/pulsar.git
 cd pulsar
 ( cd lynx/lynx-pulsar && npm install )
 ( cd lynx/lynx-pulsar-app && npm install )
-
-cd ~/github/lynx-pulsar-explorer/explorer/darwin/ios/lynx_explorer
-xcodebuild -workspace LynxExplorer.xcworkspace -scheme LynxExplorer \
-  -configuration Release \
-  -destination "generic/platform=iOS" \
-  -allowProvisioningUpdates \
-  -derivedDataPath build clean build
-
-# Package + install (UDID from `idevice_id -l`)
-cd build/Build/Products/Release-iphoneos
-mkdir Payload && cp -R LynxExplorer.app Payload/
-zip -rq /tmp/lynx-pulsar.ipa Payload/
-ideviceinstaller -u <UDID> install /tmp/lynx-pulsar.ipa
 ```
 
-Full step-by-step (including simulator path, host project setup, troubleshooting) on the [run the demo](/pulsar/lynx/build-prompt/) page.
+Then build the iOS host and ship the bundle — full walkthrough (simulator path, physical-device path, troubleshooting) on the [run the demo](/pulsar/lynx/build-prompt/) page. First-time setup is ~30 minutes (mostly Lynx C++ pods); subsequent rebuilds run in a few minutes.
 
 ## Use it in your app
 
@@ -49,13 +36,28 @@ Presets.System.impactMedium();
 Presets.System.notificationSuccess();
 
 // Custom pattern
-const composer = usePatternComposer();
-composer.discrete({ time: 0,   intensity: 1.0, sharpness: 0.8 });
-composer.continuous({ start: 0.2, end: 0.4, intensity: 0.3, sharpness: 0.2 });
+const composer = usePatternComposer({
+  discretePattern: [
+    { time: 0,   amplitude: 1.0, frequency: 0.8 },
+    { time: 100, amplitude: 0.5, frequency: 0.5 },
+  ],
+  continuousPattern: {
+    amplitude: [{ time: 200, value: 0.3 }, { time: 400, value: 0 }],
+    frequency: [{ time: 200, value: 0.2 }, { time: 400, value: 0.2 }],
+  },
+});
 composer.play();
 ```
 
 The full API is on the [SDK reference](/pulsar/sdk/lynx/) page.
+
+## Install
+
+```bash
+npm install lynx-pulsar
+```
+
+Then build a Lynx host (or fork the provided one) that registers `PulsarLynxModule`. The [Lynx Pulsar host](https://github.com/Huxpro/pulsar/tree/lynx-port/lynx/lynx-pulsar) included in this fork does it end-to-end; integrating into your own iOS host follows the same pattern as any Lynx native module. See [How it works](/pulsar/lynx/architecture/) for the wiring details.
 
 ## How it ships
 
@@ -65,7 +67,7 @@ The full API is on the [SDK reference](/pulsar/sdk/lynx/) page.
   <LinkCard
     title="Run the demo"
     href={`${BASE_PATH}/lynx/build-prompt/`}
-    description="Build the 151-preset showcase app on your iOS Simulator or physical iPhone in under 10 minutes."
+    description="Build the 151-preset showcase app on your iOS Simulator or physical iPhone. ~30 min the first time, a few minutes after that."
   />
   <LinkCard
     title="SDK reference"

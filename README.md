@@ -19,8 +19,8 @@ This fork ports the React Native side of Pulsar — adapter, presets, and the po
 ## What's new in this fork
 
 - **`lynx/lynx-pulsar/`** — Lynx adapter library. Objective-C bridge (`PulsarLynxModule`) to the vendored Pulsar Swift SDK, 151 hand-crafted preset metadata records, `usePatternComposer` / `useRealtimeComposer` hooks. Mirrors `react-native/react-native-pulsar/` but de-worklet-ed for Lynx's threading model.
-- **`lynx/lynx-pulsar-app/`** — the polished Lynx app (a port of upstream `PulsarApp/`). Home / Presets / Playground / Demos. Self-contained `.lynx` bundle (assets inlined as dataURIs) — runs on a customized LynxExplorer host with no dev server.
-- **`lynx/lynx-pulsar-demo/`** — minimal SDK harness (a port of `react-native/PulsarApp/`).
+- **`lynx/lynx-pulsar-app/`** — **Pulsar Showcase**, a Lynx port of upstream [`PulsarApp/`](PulsarApp/). Home / Presets / Playground / Demos. Self-contained `.lynx` bundle (assets inlined as dataURIs) — runs on a customized LynxExplorer host with no dev server.
+- **`lynx/lynx-pulsar-demo/`** — **Pulsar Example**, a Lynx port of the RN example app at [`react-native/PulsarApp/`](react-native/PulsarApp/) (originally `react-native/example/`). The minimal SDK-validation surface — one button per story.
 - **Build pipeline** — Release-only Xcode build phase auto-runs `rspeedy build` and copies the bundle into the `.app/Resource/`. Same `xcodebuild` archive flow as a native iOS app; `npm` plumbing is hidden.
 
 For the full integration story (one-shot AI build prompt, simulator + device flows, troubleshooting), see [`lynx/lynx-pulsar-app/README.md`](lynx/lynx-pulsar-app/README.md). Architecture and per-tab port notes live in [`lynx/AGENTS.md`](lynx/AGENTS.md) and [`lynx/lynx-pulsar-app/AGENTS.md`](lynx/lynx-pulsar-app/AGENTS.md).
@@ -63,12 +63,12 @@ The other surfaces stay exactly as Software Mansion ships them. For install snip
 pulsar/                            # huxpro/pulsar (this fork)
 ├── iOS/                           # upstream Swift SDK — untouched
 ├── Android/                       # upstream Kotlin SDK — untouched
-├── react-native/                  # upstream RN adapter + harness — untouched
+├── react-native/                  # upstream RN adapter + example — untouched
 ├── PulsarApp/                     # upstream Expo showcase — the Lynx port's source
 ├── lynx/                          # ← everything new
 │   ├── lynx-pulsar/               # Lynx adapter library
-│   ├── lynx-pulsar-app/           # the polished app (port of PulsarApp/)
-│   ├── lynx-pulsar-demo/          # SDK harness (port of react-native/PulsarApp/)
+│   ├── lynx-pulsar-app/           # Pulsar Showcase (port of PulsarApp/)
+│   ├── lynx-pulsar-demo/          # Pulsar Example   (port of react-native/PulsarApp/)
 │   ├── AGENTS.md                  # ReactLynx rules + LynxExplorer host setup
 │   └── lynx-pulsar-app/AGENTS.md  # port-specific design notes
 └── docs/                          # Astro / Starlight docs site (deploys to GitHub Pages)
@@ -78,7 +78,7 @@ pulsar/                            # huxpro/pulsar (this fork)
 
 | Platform | Package | Source |
 |----------|---------|--------|
-| **Lynx** | (not yet published) | [`lynx/lynx-pulsar/`](lynx/lynx-pulsar/) |
+| **Lynx** | [![npm](https://img.shields.io/npm/v/lynx-pulsar)](https://www.npmjs.com/package/lynx-pulsar) | [`lynx/lynx-pulsar/`](lynx/lynx-pulsar/) |
 | React Native | [![npm](https://img.shields.io/npm/v/react-native-pulsar)](https://www.npmjs.com/package/react-native-pulsar) | upstream |
 | iOS | [Swift Package](https://github.com/software-mansion-labs/pulsar-ios) | upstream |
 | Android | [Maven Central](https://central.sonatype.com/artifact/com.swmansion/pulsar) | upstream |
