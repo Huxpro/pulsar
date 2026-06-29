@@ -1229,7 +1229,7 @@ html.js .reveal.in { opacity: 1; transform: none; }
   <ol class="recipe reveal">
     <li><strong>Adapter first, UI later.</strong> Lock the TS surface against a <code>test-sync-returns/</code> harness before touching any view code.</li>
     <li><strong>Minimal demo before polished one.</strong> A throwaway test app exercises every API call; the polished port falls back to it when ReactLynx breaks.</li>
-    <li><strong>Codify constraints in AGENTS.md.</strong> "No conditional JSX," "single file," "scroll-view not overflow": written down, routed from CLAUDE.md, linked from each PRD.</li>
+    <li><strong>Codify constraints in AGENTS.md — but verify them.</strong> "All lengths need units," "<code>scroll-view</code> not <code>overflow</code>," "dual-thread <code>NativeModules</code> guard": written down, routed from CLAUDE.md, linked from each PRD. Re-test the strong ones before they ossify as folklore.</li>
     <li><strong>One PRD per unit of work, with a Verification Protocol.</strong> lynx-docs lookup → <code>npm run build</code> → DevTool screenshot → console-error check. Every story.</li>
     <li><strong>Compile-passing is not done.</strong> End-to-end verify on device before claiming a story green.</li>
   </ol>
