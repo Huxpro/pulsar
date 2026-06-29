@@ -832,13 +832,12 @@ html.js .reveal.in { opacity: 1; transform: none; }
   <a href="#s5" title="Adapter port"></a>
   <a href="#s6" title="The diff"></a>
   <a href="#s7" title="Where Lynx differs"></a>
-  <a href="#s8" title="Slopfork recipe"></a>
 </nav>
 
 <!-- =========================================================
      1. HERO
 ========================================================= -->
-<section id="s1" class="slide hero" data-num="01 / 08">
+<section id="s1" class="slide hero" data-num="01 / 07">
   <div class="hero-grid">
     <div class="reveal">
       <p class="eyebrow">A Hackathon Story · 2026</p>
@@ -859,7 +858,7 @@ html.js .reveal.in { opacity: 1; transform: none; }
 <!-- =========================================================
      2. WHAT IS PULSAR
 ========================================================= -->
-<section id="s2" class="slide" data-num="02 / 08">
+<section id="s2" class="slide" data-num="02 / 07">
   <p class="eyebrow reveal">Context</p>
   <h2 class="reveal">What is <em>Pulsar?</em></h2>
   <p class="lede reveal" style="margin-top: 12px; max-width: 940px;">
@@ -883,7 +882,7 @@ html.js .reveal.in { opacity: 1; transform: none; }
 <!-- =========================================================
      3. PRESET CONCEPTS: what a Pulsar preset actually is
 ========================================================= -->
-<section id="s3" class="slide" data-num="03 / 08">
+<section id="s3" class="slide" data-num="03 / 07">
   <p class="eyebrow reveal">A Preset, Visualized</p>
   <h2 class="reveal">A haptic <em>preset</em> is a named pattern with an envelope.</h2>
   <p class="lede reveal" style="max-width: 940px;">
@@ -945,7 +944,7 @@ html.js .reveal.in { opacity: 1; transform: none; }
 <!-- =========================================================
      4. THE STACK: paired stacks with shared SDK at the bottom
 ========================================================= -->
-<section id="s4" class="slide" data-num="04 / 08">
+<section id="s4" class="slide" data-num="04 / 07">
   <p class="eyebrow reveal">Architecture</p>
   <h2 class="reveal">Two adapters, one engine.</h2>
   <p class="lede reveal" style="margin-top: 8px;">The Swift and Kotlin Pulsar SDKs are mirrored into both adapters
@@ -1007,7 +1006,7 @@ html.js .reveal.in { opacity: 1; transform: none; }
 <!-- =========================================================
      5. ADAPTER PORT: the numbers (was old slide 6)
 ========================================================= -->
-<section id="s5" class="slide" data-num="05 / 08">
+<section id="s5" class="slide" data-num="05 / 07">
   <p class="eyebrow reveal">Layer ② · lynx-pulsar</p>
   <h2 class="reveal">~70% reused. ~20% adapted. ~10% net new.</h2>
   <p class="lede reveal">Most of the React Native adapter's TS surface mapped 1:1 to Lynx.
@@ -1066,7 +1065,7 @@ html.js .reveal.in { opacity: 1; transform: none; }
 <!-- =========================================================
      7. THE DIFF
 ========================================================= -->
-<section id="s6" class="slide" data-num="06 / 08">
+<section id="s6" class="slide" data-num="06 / 07">
   <p class="eyebrow reveal">The shape of the edit</p>
   <h2 class="reveal">Same hook. Two worlds.</h2>
   <p class="lede reveal" style="max-width:900px;"><code class="inline">usePatternComposer</code>, the hook a Pulsar app uses
@@ -1179,7 +1178,7 @@ html.js .reveal.in { opacity: 1; transform: none; }
 <!-- =========================================================
      8. WHERE LYNX DIFFERS
 ========================================================= -->
-<section id="s7" class="slide" data-num="07 / 08">
+<section id="s7" class="slide" data-num="07 / 07">
   <p class="eyebrow reveal">ReactLynx · the not-so-mechanical parts</p>
   <h2 class="reveal">Where Lynx <em>actually</em> differs.</h2>
   <p class="lede reveal" style="max-width: 900px;">The adapter port is mechanical. The UI port is not.
@@ -1214,33 +1213,6 @@ html.js .reveal.in { opacity: 1; transform: none; }
   </div>
 </section>
 
-<!-- =========================================================
-     (DROPPED: old slides 9 UI port, 10 Harness pillars)
-========================================================= -->
-<!-- =========================================================
-     8. SLOPFORK RECIPE: closer (dark navy visual from old s12)
-========================================================= -->
-<section id="s8" class="slide end" data-num="08 / 08">
-  <p class="eyebrow reveal">Repeatable</p>
-  <h2 class="reveal">The <em>slopfork</em> recipe.</h2>
-  <p class="lede reveal" style="max-width: 940px;">For the next port, Reanimated, Skia, Gesture Handler,
-  anything with a Native Module shape, here's the order that worked.</p>
-
-  <ol class="recipe reveal">
-    <li><strong>Adapter first, UI later.</strong> Lock the TS surface against a <code>test-sync-returns/</code> harness before touching any view code.</li>
-    <li><strong>Minimal demo before polished one.</strong> A throwaway test app exercises every API call; the polished port falls back to it when ReactLynx breaks.</li>
-    <li><strong>Codify constraints in AGENTS.md — but verify them.</strong> "All lengths need units," "<code>scroll-view</code> not <code>overflow</code>," "dual-thread <code>NativeModules</code> guard": written down, routed from CLAUDE.md, linked from each PRD. Re-test the strong ones before they ossify as folklore.</li>
-    <li><strong>One PRD per unit of work, with a Verification Protocol.</strong> lynx-docs lookup → <code>npm run build</code> → DevTool screenshot → console-error check. Every story.</li>
-    <li><strong>Compile-passing is not done.</strong> End-to-end verify on device before claiming a story green.</li>
-  </ol>
-
-  <div class="bigquote reveal">
-    <p>"Compile-passing &ne; working. Verify end-to-end."</p>
-    <cite>global CLAUDE.md, principle #4</cite>
-  </div>
-
-  <p class="byline reveal" style="margin-top: 40px;">Hux · ByteDance Lynx · 2026</p>
-</section>
 
 <!-- ==========================================================
      Preset playback (slide 3): WebAudio + scrolling indicator.
