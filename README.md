@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/software-mansion/pulsar/blob/main/docs/src/assets/og.png" alt="Pulsar - Rich and ready-to use haptics library" />
+  <img src="https://raw.githubusercontent.com/software-mansion/pulsar/main/docs/src/assets/og.png" alt="Pulsar - Rich and ready-to use haptics library" />
 </p>
 
 <h1 align="center">Lynx Pulsar</h1>
@@ -66,11 +66,10 @@ pulsar/                            # huxpro/pulsar (this fork)
 ├── react-native/                  # upstream RN adapter + example — untouched
 ├── PulsarApp/                     # upstream Expo showcase — the Lynx port's source
 ├── lynx/                          # ← everything new
-│   ├── lynx-pulsar/               # Lynx adapter library
-│   ├── lynx-pulsar-app/           # Pulsar Showcase (port of PulsarApp/)
-│   ├── lynx-pulsar-demo/          # Pulsar Example   (port of react-native/PulsarApp/)
-│   ├── AGENTS.md                  # ReactLynx rules + LynxExplorer host setup
-│   └── lynx-pulsar-app/AGENTS.md  # port-specific design notes
+│   ├── lynx-pulsar/               # Lynx adapter library  (published as `lynx-pulsar` on npm)
+│   ├── lynx-pulsar-app/           # Pulsar Showcase        (port of PulsarApp/)
+│   ├── lynx-pulsar-demo/          # Pulsar Example         (port of react-native/PulsarApp/)
+│   └── AGENTS.md                  # ReactLynx rules + LynxExplorer host setup
 └── docs/                          # Astro / Starlight docs site (deploys to GitHub Pages)
 ```
 
@@ -86,6 +85,7 @@ pulsar/                            # huxpro/pulsar (this fork)
 ## Documentation
 
 - **Lynx Pulsar:** [huangxuan.me/pulsar](https://huangxuan.me/pulsar)
+- **`lynx-pulsar` on npm:** [npmjs.com/package/lynx-pulsar](https://www.npmjs.com/package/lynx-pulsar)
 - **Upstream Pulsar:** [docs.swmansion.com/pulsar](https://docs.swmansion.com/pulsar)
 
 ## Contributing

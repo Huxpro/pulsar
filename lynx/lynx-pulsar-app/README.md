@@ -137,7 +137,7 @@ xcrun simctl launch booted com.huxpro.lynx.pulsar
 
 - [ ] `~/github/lynx-pulsar-explorer/.../LynxExplorer.xcodeproj/project.pbxproj` contains `"Bundle Pulsar Lynx code"`.
 - [ ] `dist/main.lynx.bundle` exists after `npm run build` (Release) or `npm run dev` (Debug).
-- [ ] The installed app shows `Lynx Pulsar` under its icon on the home screen, with the Pulsar icon (white phone, navy ring, magenta dot).
+- [ ] The installed app shows `Lynx Pulsar` under the official Pulsar app icon on the home screen.
 - [ ] Launching the Release-installed app goes straight to `Welcome to Pulsar!` + four-icon tab bar — no Bundle-URL card.
 - [ ] Tapping a preset card produces a haptic on a physical device (the simulator has no haptic engine; the JS `INVOKE` line still shows in the rspeedy terminal in Debug).
 
@@ -152,7 +152,6 @@ xcrun simctl launch booted com.huxpro.lynx.pulsar
 | Physical device install fails with provisioning error | Make sure your Apple ID is added to Xcode > Settings > Accounts, and your iPhone is paired and unlocked. `-allowProvisioningUpdates` will create a free dev cert for `com.huxpro.lynx.pulsar` automatically. |
 | First launch on device shows "Untrusted Developer" | Settings → General → VPN & Device Management → Trust the cert. |
 | Pod install stuck on PrimJS | Normal first time (~20-30 min). Subsequent installs reuse the cache. |
-| `Snapshot not found` runtime error | Conditional JSX or multi-file component imports in `App.tsx`. See `lynx/AGENTS.md → ReactLynx Critical Rules`. |
 | Build fails with `text-transform is not supported` | Lynx CSS limitation — remove the property; capitalize in source instead. |
 | `npm install` complains about peer `@lynx-js/react` | The adapter pins `0.116.4`; do not upgrade across minor versions without re-testing against `pluginReactLynx`. |
 

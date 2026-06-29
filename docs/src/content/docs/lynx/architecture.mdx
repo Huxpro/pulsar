@@ -9,8 +9,8 @@ The path a tap takes from your Lynx code to a vibration on the device:
 ┌─────────────────────────────────────────────────────────┐
 │  Your Lynx app                                          │
 │  ┌──────────────────────────────────────────────────┐   │
-│  │ JSX (background thread)                          │   │
-│  │   <view bindtap={() => Presets.dogBark()}>       │   │
+│  │ Event handler (background thread)                │   │
+│  │   bindtap={() => Presets.dogBark()}              │   │
 │  └────────────┬─────────────────────────────────────┘   │
 │               │ NativeModules.PulsarModule              │
 │               ▼                                          │

@@ -8,18 +8,13 @@ import { BASE_PATH } from '../../../../config';
 
 Lynx Pulsar gives your [Lynx](https://lynxjs.org) app haptic feedback through a native module that talks to Core Haptics on iOS. It ships **151 hand-crafted presets** (anvil, heartbeat, balloonPop, …), a **pattern composer** for custom haptic sequences, and a **realtime composer** for gesture-driven feedback.
 
-## Try it
-
-The fastest way to feel what it does is to install the demo on your iPhone. Get the JS side set up:
+## Install
 
 ```bash
-git clone https://github.com/Huxpro/pulsar.git
-cd pulsar
-( cd lynx/lynx-pulsar && npm install )
-( cd lynx/lynx-pulsar-app && npm install )
+npm install lynx-pulsar
 ```
 
-Then build the iOS host and ship the bundle — full walkthrough (simulator path, physical-device path, troubleshooting) on the [run the demo](/pulsar/lynx/build-prompt/) page. First-time setup is ~30 minutes (mostly Lynx C++ pods); subsequent rebuilds run in a few minutes.
+Peer dependency: `@lynx-js/react >= 0.118`. You also need a Lynx host that registers `PulsarLynxModule` so JS calls reach Core Haptics — the [Lynx Pulsar host](https://github.com/Huxpro/pulsar/tree/lynx-port/lynx/lynx-pulsar) included in this fork does it end-to-end; integrating into your own iOS host follows the same pattern as any Lynx native module. See [How it works](/pulsar/lynx/architecture/) for the wiring details.
 
 ## Use it in your app
 
@@ -51,17 +46,18 @@ composer.play();
 
 The full API is on the [SDK reference](/pulsar/sdk/lynx/) page.
 
-## Install
+## Try the demo
+
+The fastest way to feel what it does is to install the showcase app on your iPhone. Clone the repo and install JS deps:
 
 ```bash
-npm install lynx-pulsar
+git clone https://github.com/Huxpro/pulsar.git
+cd pulsar
+( cd lynx/lynx-pulsar && npm install )
+( cd lynx/lynx-pulsar-app && npm install )
 ```
 
-Then build a Lynx host (or fork the provided one) that registers `PulsarLynxModule`. The [Lynx Pulsar host](https://github.com/Huxpro/pulsar/tree/lynx-port/lynx/lynx-pulsar) included in this fork does it end-to-end; integrating into your own iOS host follows the same pattern as any Lynx native module. See [How it works](/pulsar/lynx/architecture/) for the wiring details.
-
-## How it ships
-
-`lynx-pulsar` is a Lynx native module wrapping Pulsar's Swift SDK. On iOS, your Lynx app's host needs to register `PulsarLynxModule` so JS calls cross into Core Haptics. The provided [Lynx Pulsar host](https://github.com/Huxpro/pulsar/tree/lynx-port/lynx/lynx-pulsar) does this for you; integrating into an existing iOS host follows the same pattern as any Lynx native module.
+Then build the iOS host and ship the bundle — full walkthrough (simulator path, physical-device path, troubleshooting) on the [run the demo](/pulsar/lynx/build-prompt/) page. First-time setup is ~30 minutes (mostly Lynx C++ pods); subsequent rebuilds run in a few minutes.
 
 <CardGrid>
   <LinkCard
